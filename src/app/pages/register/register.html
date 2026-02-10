@@ -1,0 +1,74 @@
+<div class="centered-container">
+    <div class="auth-card">
+        <h2>Register</h2>
+
+        <form (ngSubmit)="register()" #registerForm="ngForm">
+
+            <!-- 1. Agency Information -->
+            <div class="form-section">
+                <h3>🏢 Agency Information</h3>
+                <input type="text" placeholder="Agency Name *" [(ngModel)]="agencyName" name="agencyName" required />
+                <div style="display: flex; gap: 1rem;">
+                    <input type="text" placeholder="City *" [(ngModel)]="agencyCity" name="agencyCity" required
+                        style="flex: 1;" />
+                    <input type="text" placeholder="Zip (Opt)" [(ngModel)]="agencyZip" name="agencyZip"
+                        style="flex: 0.5;" />
+                </div>
+                <input type="text" placeholder="Full Address *" [(ngModel)]="agencyAddress" name="agencyAddress"
+                    required />
+            </div>
+
+            <!-- 2. Manager Information -->
+            <div class="form-section">
+                <h3>👤 Manager Information</h3>
+                <div style="display: flex; gap: 1rem;">
+                    <input type="text" placeholder="First Name *" [(ngModel)]="managerFirstName" name="managerFirstName"
+                        required />
+                    <input type="text" placeholder="Last Name *" [(ngModel)]="managerLastName" name="managerLastName"
+                        required />
+                </div>
+                <input type="tel" placeholder="Phone Number *" [(ngModel)]="managerPhone" name="managerPhone"
+                    required />
+
+                <div>
+                    <input type="email" placeholder="Professional Email *" [(ngModel)]="email" name="email" required
+                        email #emailInput="ngModel"
+                        [style.border-color]="emailInput.invalid && (emailInput.dirty || emailInput.touched) ? '#EF4444' : ''" />
+                    <div *ngIf="emailInput.invalid && (emailInput.dirty || emailInput.touched)"
+                        style="color: #EF4444; font-size: 0.875rem; margin-top: -0.5rem; margin-bottom: 1rem;">
+                        <small *ngIf="emailInput.errors?.['required']">Email is required.</small>
+                        <small *ngIf="emailInput.errors?.['email']">Please enter a valid email address.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Legal Information (Optional) -->
+            <div class="form-section">
+                <h3>⚖️ Legal Information (Optional)</h3>
+                <input type="text" placeholder="Legal Name" [(ngModel)]="legalName" name="legalName" />
+                <div style="display: flex; gap: 1rem;">
+                    <input type="text" placeholder="RC Number" [(ngModel)]="legalRc" name="legalRc" />
+                    <input type="text" placeholder="Tax ID" [(ngModel)]="legalTaxId" name="legalTaxId" />
+                </div>
+            </div>
+
+            <!-- 4. Authentication -->
+            <div class="form-section">
+                <h3>🔐 Security</h3>
+                <input type="password" placeholder="Password (Min 8 chars) *" [(ngModel)]="password" name="password"
+                    required minlength="8" />
+                <input type="password" placeholder="Confirm Password *" [(ngModel)]="confirmPassword"
+                    name="confirmPassword" required />
+            </div>
+
+            <button type="submit" [disabled]="!registerForm.form.valid">Create Account</button>
+        </form>
+
+        <p class="error-msg" *ngIf="error">{{ error }}</p>
+
+        <p style="text-align: center; margin-top: 1rem;">
+            Already have an account? <a routerLink="/login"
+                style="color: var(--primary); text-decoration: none;">Login</a>
+        </p>
+    </div>
+</div>

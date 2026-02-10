@@ -1,0 +1,17 @@
+<div class="centered-container">
+    <div class="auth-card">
+        <h2>Enter OTP</h2>
+        <p style="text-align: center; color: var(--text-muted); margin-bottom: 1.5rem;">
+            Please enter the verification code sent to your device.
+        </p>
+
+        <form (ngSubmit)="verify()">
+            <input type="text" placeholder="Enter OTP Code" [(ngModel)]="otpCode" name="otp" required
+                style="text-align: center; letter-spacing: 0.5rem; font-size: 1.25rem;" />
+
+            <button type="submit">Verify</button>
+        </form>
+
+        <p class="error-msg" *ngIf="error">{{ error }}</p>
+    </div>
+</div>

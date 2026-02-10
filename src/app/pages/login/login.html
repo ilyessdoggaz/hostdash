@@ -1,0 +1,33 @@
+<div class="centered-container">
+  <div class="auth-card">
+    <h2>Login</h2>
+
+    <form (ngSubmit)="login()" #loginForm="ngForm">
+      <div>
+        <input type="email" placeholder="Email" [(ngModel)]="email" name="email" required email #emailInput="ngModel"
+          [style.border-color]="emailInput.invalid && (emailInput.dirty || emailInput.touched) ? '#EF4444' : ''" />
+        <div *ngIf="emailInput.invalid && (emailInput.dirty || emailInput.touched)"
+          style="color: #EF4444; font-size: 0.875rem; margin-top: -0.5rem; margin-bottom: 1rem;">
+          <small *ngIf="emailInput.errors?.['required']">Email is required.</small>
+          <small *ngIf="emailInput.errors?.['email']">Please enter a valid email address.</small>
+        </div>
+      </div>
+
+      <input type="password" placeholder="Password" [(ngModel)]="password" name="password" required />
+
+      <button type="submit" [disabled]="!loginForm.form.valid" [style.opacity]="!loginForm.form.valid ? '0.5' : '1'"
+        [style.cursor]="!loginForm.form.valid ? 'not-allowed' : 'pointer'">Login</button>
+    </form>
+
+    <div style="text-align: right; margin-bottom: 1rem;">
+      <a routerLink="/forgot-password" style="color: var(--primary); text-decoration: none; font-size: 0.875rem;">Forgot
+        Password?</a>
+    </div>
+
+    <p class="error-msg" *ngIf="error">{{ error }}</p>
+
+    <p style="text-align: center; margin-top: 1rem;">
+      Don't have an account? <a routerLink="/register" style="color: var(--primary); text-decoration: none;">Sign Up</a>
+    </p>
+  </div>
+</div>
