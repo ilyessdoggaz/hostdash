@@ -1,59 +1,124 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable, of, throwError } from "rxjs";
+import { catchError, map, delay } from "rxjs/operators";
+
+export interface AuthResponse {
+  token?: string;
+  userId?: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  verified?: boolean;
+  requiresOtp?: boolean;
+  message?: string;
+  status?: string;
+}
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class Auth {
+  private apiUrl = "http://localhost:8080/api/auth";
 
-  // Use relative path for proxy to work
-  private API_URL = '/api/auth';
+  private readonly demoEmail = "test@test.com";
+  private readonly demoPassword = "new";
+  private readonly demoOtp = "123456";
+
+  private currentEmail: string | null = null;
 
   constructor(private http: HttpClient) { }
 
-  login(email: string, password: string): Observable<any> {
-    // DEMO MODE: Bypass backend if email is 'test@test.com' and password is 'new'
-    if (email.toLowerCase() === 'test@test.com' && password === 'new') {
-      return of({ otpRequired: true, userId: 'demo-user-123' });
-    }
-
-    return this.http.post(`${this.API_URL}/login`, {
-      email,
-      password
-    });
+  login(email: string, password: string): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/login`, { email, password })
+      .pipe(
+        map((response) => {
+          this.currentEmail = response.email || null;
+          if (response.token) {
+            localStorage.setItem("token", response.token);
+            localStorage.setItem("user", JSON.stringify(response));
+          }
+          return response;
+        }),
+        catchError((error) => {
+          return throwError(() => error.error?.message || "Login failed");
+        })
+      );
   }
 
-  verifyOtp(userId: string, otp: string): Observable<any> {
-    // DEMO MODE: Bypass backend if OTP is '123456'
-    if (otp === '123456') {
-      return of({ token: 'demo-fake-jwt-token' });
-    }
-
-    return this.http.post(`${this.API_URL}/verify-otp`, {
-      userId,
-      otp
-    });
+  verifyOtp(email: string, otpCode: string): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/verify-otp`, { email, code: otpCode })
+      .pipe(
+        map((response) => {
+          if (response.token) {
+            localStorage.setItem("token", response.token);
+            localStorage.setItem("user", JSON.stringify(response));
+          }
+          return response;
+        }),
+        catchError((error) => {
+          return throwError(() => error.error?.message || "OTP verification failed");
+        })
+      );
   }
 
-  logout() {
-    localStorage.clear();
-    // In a real app, you might want to navigate to login here or notify state management
+  register(data: any): Observable<AuthResponse> {
+    const agencyData = {
+      email: data.manager?.email || data.email,
+      password: data.password,
+      name: data.agency?.name || data.agencyName,
+      phoneNumber: data.manager?.phone || data.managerPhone,
+      adminCin: "",
+      rne: data.legal?.rc || data.legalRc || "",
+      taxId: data.legal?.taxId || data.legalTaxId || ""
+    };
+
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/register/host`, agencyData)
+      .pipe(
+        map((response) => {
+          this.currentEmail = response.email || null;
+          return response;
+        }),
+        catchError((error) => {
+          return throwError(() => error.error?.message || "Registration failed");
+        })
+      );
   }
 
-  register(user: any): Observable<any> {
-    // DEMO MODE
-    return of({ success: true, message: 'Registration successful' });
-
-    // Real backend call would be:
-    // return this.http.post(`${this.API_URL}/register`, user);
+  forgotPassword(email: string): Observable<AuthResponse> {
+    return of({
+      message: "If this email exists, a password reset link has been sent."
+    }).pipe(delay(1000));
   }
 
-  forgotPassword(email: string): Observable<any> {
-    // DEMO MODE
-    return of({ success: true, message: 'Reset link sent to email' });
+  logout(): void {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    this.currentEmail = null;
+  }
 
-    // Real backend call would be:
-    // return this.http.post(`${this.API_URL}/forgot-password`, { email });
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem("token");
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem("token");
+  }
+
+  getCurrentUser(): AuthResponse | null {
+    const user = localStorage.getItem("user");
+    return user ? JSON.parse(user) : null;
+  }
+
+  getCurrentEmail(): string | null {
+    return this.currentEmail;
+  }
+
+  resendOtp(email: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/resend-otp?email=${email}`, {});
   }
 }

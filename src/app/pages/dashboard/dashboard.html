@@ -1,46 +1,66 @@
 <div class="dashboard-layout">
-    <nav class="sidebar">
-        <div class="logo">Hostdash</div>
-        <ul>
-            <li class="active">Dashboard</li>
-            <li>My Cars</li>
-            <li>Bookings</li>
-            <li>Earnings</li>
-            <li class="logout" (click)="logout()">Logout</li>
-        </ul>
-    </nav>
+  <nav class="sidebar">
+    <div class="logo">Hostdash</div>
+    <ul>
+      <li class="active">Dashboard</li>
+      <li>My Cars</li>
+      <li>Bookings</li>
+      <li>Earnings</li>
+      <li class="logout" (click)="logout()">Logout</li>
+    </ul>
+  </nav>
 
-    <main class="content">
-        <header>
-            <h1>Dashboard</h1>
-            <div class="user-profile">Host User</div>
-        </header>
+  <main class="content">
+    <header>
+      <h1>Welcome back, <span style="color: var(--primary);">{{currentUser?.firstName || 'Host'}}</span></h1>
+      <div class="user-profile">{{currentUser?.firstName}} {{currentUser?.lastName || ''}}</div>
+    </header>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Total Earnings</h3>
-                <p class="value">$0.00</p>
-            </div>
-            <div class="stat-card">
-                <h3>Active Rentals</h3>
-                <p class="value">0</p>
-            </div>
-            <!-- Pending requests removed - booking is instant -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Total Earnings</h3>
+        <p class="value">$0.00</p>
+      </div>
+      <div class="stat-card">
+        <h3>Active Rentals</h3>
+        <p class="value">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Available Cars</h3>
+        <p class="value">2</p>
+      </div>
+    </div>
+
+    <div class="dashboard-map-section">
+      <div class="map-header">
+        <h3> Live Car Tracker - Tunisia</h3>
+        <div class="map-legend">
+          <span class="legend-item"><span class="dot active"></span> Active</span>
+          <span class="legend-item"><span class="dot available"></span> Available</span>
+          <span class="legend-item"><span class="dot rented"></span> Rented</span>
         </div>
+      </div>
+      <div id="google-map" class="google-map-container"></div>
+    </div>
 
-        <div class="dashboard-map-section">
-            <h3>Live Car Tracker</h3>
-            <div class="map-placeholder">
-                <div class="map-bg"></div>
-                <div class="map-marker" style="top: 40%; left: 30%;" title="Car 1: Active"></div>
-                <div class="map-marker" style="top: 60%; left: 70%;" title="Car 2: Available"></div>
-                <div class="map-message">Interactive Map Component</div>
-            </div>
+    <div class="dashboard-card recent-activity">
+      <h3>Recent Activity</h3>
+      <div class="activity-list">
+        <div class="activity-item">
+          <div class="activity-icon"><i class="material-icons">event</i></div>
+          <div class="activity-details">
+            <strong>John Doe</strong> booked Volkswagen Golf
+            <p>2 hours ago</p>
+          </div>
         </div>
-
-        <div class="dashboard-card">
-            <h3>Recent Activity</h3>
-            <p>Your recent car listings and booking activity will appear here.</p>
+        <div class="activity-item">
+          <div class="activity-icon"><i class="material-icons">done</i></div>
+          <div class="activity-details">
+            <strong>Ahmed S.</strong> completed rental for Renault Clio
+            <p>Yesterday</p>
+          </div>
         </div>
-    </main>
+      </div>
+    </div>
+  </main>
 </div>

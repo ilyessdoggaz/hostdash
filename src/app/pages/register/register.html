@@ -1,74 +1,53 @@
 <div class="centered-container">
-    <div class="auth-card">
-        <h2>Register</h2>
-
-        <form (ngSubmit)="register()" #registerForm="ngForm">
-
-            <!-- 1. Agency Information -->
-            <div class="form-section">
-                <h3>🏢 Agency Information</h3>
-                <input type="text" placeholder="Agency Name *" [(ngModel)]="agencyName" name="agencyName" required />
-                <div style="display: flex; gap: 1rem;">
-                    <input type="text" placeholder="City *" [(ngModel)]="agencyCity" name="agencyCity" required
-                        style="flex: 1;" />
-                    <input type="text" placeholder="Zip (Opt)" [(ngModel)]="agencyZip" name="agencyZip"
-                        style="flex: 0.5;" />
-                </div>
-                <input type="text" placeholder="Full Address *" [(ngModel)]="agencyAddress" name="agencyAddress"
-                    required />
-            </div>
-
-            <!-- 2. Manager Information -->
-            <div class="form-section">
-                <h3>👤 Manager Information</h3>
-                <div style="display: flex; gap: 1rem;">
-                    <input type="text" placeholder="First Name *" [(ngModel)]="managerFirstName" name="managerFirstName"
-                        required />
-                    <input type="text" placeholder="Last Name *" [(ngModel)]="managerLastName" name="managerLastName"
-                        required />
-                </div>
-                <input type="tel" placeholder="Phone Number *" [(ngModel)]="managerPhone" name="managerPhone"
-                    required />
-
-                <div>
-                    <input type="email" placeholder="Professional Email *" [(ngModel)]="email" name="email" required
-                        email #emailInput="ngModel"
-                        [style.border-color]="emailInput.invalid && (emailInput.dirty || emailInput.touched) ? '#EF4444' : ''" />
-                    <div *ngIf="emailInput.invalid && (emailInput.dirty || emailInput.touched)"
-                        style="color: #EF4444; font-size: 0.875rem; margin-top: -0.5rem; margin-bottom: 1rem;">
-                        <small *ngIf="emailInput.errors?.['required']">Email is required.</small>
-                        <small *ngIf="emailInput.errors?.['email']">Please enter a valid email address.</small>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. Legal Information (Optional) -->
-            <div class="form-section">
-                <h3>⚖️ Legal Information (Optional)</h3>
-                <input type="text" placeholder="Legal Name" [(ngModel)]="legalName" name="legalName" />
-                <div style="display: flex; gap: 1rem;">
-                    <input type="text" placeholder="RC Number" [(ngModel)]="legalRc" name="legalRc" />
-                    <input type="text" placeholder="Tax ID" [(ngModel)]="legalTaxId" name="legalTaxId" />
-                </div>
-            </div>
-
-            <!-- 4. Authentication -->
-            <div class="form-section">
-                <h3>🔐 Security</h3>
-                <input type="password" placeholder="Password (Min 8 chars) *" [(ngModel)]="password" name="password"
-                    required minlength="8" />
-                <input type="password" placeholder="Confirm Password *" [(ngModel)]="confirmPassword"
-                    name="confirmPassword" required />
-            </div>
-
-            <button type="submit" [disabled]="!registerForm.form.valid">Create Account</button>
-        </form>
-
-        <p class="error-msg" *ngIf="error">{{ error }}</p>
-
-        <p style="text-align: center; margin-top: 1rem;">
-            Already have an account? <a routerLink="/login"
-                style="color: var(--primary); text-decoration: none;">Login</a>
-        </p>
-    </div>
+  <div class="auth-card" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+    <h2>Register</h2>
+    <form (ngSubmit)="register()" #registerForm="ngForm">
+      <div class="form-section">
+        <h3>Agency Information</h3>
+        <input type="text" placeholder="Agency Name *" [(ngModel)]="agencyName" name="agencyName" required minlength="3"
+          [class.error]="errors['agencyName']" />
+        <div class="error-text" *ngIf="errors['agencyName']">{{ errors["agencyName"] }}</div>
+        <input type="text" placeholder="City * (e.g., Tunis, Sfax, Sousse)" [(ngModel)]="agencyCity" name="agencyCity"
+          required list="cities" [class.error]="errors['agencyCity']" />
+        <datalist id="cities">
+          <option *ngFor="let city of tunisiaCities" [value]="city">{{ city }}</option>
+        </datalist>
+        <div class="error-text" *ngIf="errors['agencyCity']">{{ errors["agencyCity"] }}</div>
+        <input type="text" placeholder="Full Address *" [(ngModel)]="agencyAddress" name="agencyAddress" required
+          minlength="10" [class.error]="errors['agencyAddress']" />
+        <div class="error-text" *ngIf="errors['agencyAddress']">{{ errors["agencyAddress"] }}</div>
+        <input type="text" placeholder="ZIP Code * (4 digits)" [(ngModel)]="agencyZip" name="agencyZip" required
+          maxlength="4" pattern="[0-9]{4}" [class.error]="errors['agencyZip']" />
+        <div class="error-text" *ngIf="errors['agencyZip']">{{ errors["agencyZip"] }}</div>
+      </div>
+      <div class="form-section">
+        <h3>Manager Information</h3>
+        <div style="display: flex; gap: 1rem;"><input type="text" placeholder="First Name *"
+            [(ngModel)]="managerFirstName" name="managerFirstName" required minlength="2"
+            [class.error]="errors['managerFirstName']" style="flex: 1;" /><input type="text" placeholder="Last Name *"
+            [(ngModel)]="managerLastName" name="managerLastName" required minlength="2"
+            [class.error]="errors['managerLastName']" style="flex: 1;" /></div>
+        <div class="error-text" *ngIf="errors['managerFirstName']">{{ errors["managerFirstName"] }}</div>
+        <input type="tel" placeholder="Phone * (8 digits, e.g., 20123456)" [(ngModel)]="managerPhone"
+          name="managerPhone" required maxlength="8" pattern="[2459][0-9]{7}" [class.error]="errors['managerPhone']" />
+        <div class="error-text" *ngIf="errors['managerPhone']">{{ errors["managerPhone"] }}</div>
+        <input type="email" placeholder="Email *" [(ngModel)]="email" name="email" required
+          [class.error]="errors['email']" />
+        <div class="error-text" *ngIf="errors['email']">{{ errors["email"] }}</div>
+      </div>
+      <div class="form-section">
+        <h3>Security</h3>
+        <input type="password" placeholder="Password * (8+ chars, upper, lower, number)" [(ngModel)]="password"
+          name="password" required minlength="8" [class.error]="errors['password']" />
+        <div class="error-text" *ngIf="errors['password']">{{ errors["password"] }}</div>
+        <input type="password" placeholder="Confirm Password *" [(ngModel)]="confirmPassword" name="confirmPassword"
+          required [class.error]="errors['confirmPassword']" />
+        <div class="error-text" *ngIf="errors['confirmPassword']">{{ errors["confirmPassword"] }}</div>
+      </div>
+      <button type="submit">Create Account</button>
+    </form>
+    <p class="error-msg" *ngIf="error">{{ error }}</p>
+    <p style="text-align: center; margin-top: 1rem;">Already have an account? <a routerLink="/login"
+        style="color: var(--primary);">Login</a></p>
+  </div>
 </div>

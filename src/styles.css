@@ -98,3 +98,40 @@ button:hover {
   width: 100%;
   max-width: 400px;
 }
+
+
+/* Form validation styles */
+input.error {
+  border-color: #EF4444;
+  background-color: #FEF2F2;
+}
+
+input.error:focus {
+  border-color: #EF4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.error-text {
+  color: #EF4444;
+  font-size: 0.875rem;
+  margin-top: -0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.form-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.form-section h3 {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+}
+

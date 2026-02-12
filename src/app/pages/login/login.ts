@@ -19,14 +19,23 @@ export class Login {
   constructor(
     private auth: Auth,
     private router: Router
-  ) { }
+  ) {
+    // Redirect if already logged in
+    if (this.auth.isLoggedIn()) {
+      this.router.navigate(['/dashboard']);
+    }
+  }
 
   login() {
     this.auth.login(this.email, this.password).subscribe({
       next: (res) => {
-        if (res.otpRequired) {
-          localStorage.setItem('userId', res.userId);
+        if (res.requiresOtp) {
+          // Store email for OTP verification
+          localStorage.setItem('pendingEmail', this.email);
           this.router.navigate(['/otp']);
+        } else if (res.token) {
+          // Successfully logged in
+          this.router.navigate(['/dashboard']);
         }
       },
       error: () => {

@@ -12,6 +12,16 @@
             <button type="submit">Verify</button>
         </form>
 
+        <div style="text-align: center; margin-top: 1rem;">
+            <p style="font-size: 0.875rem; color: var(--text-muted);">
+                Didn't receive the code?
+                <a href="javascript:void(0)" (click)="resend()"
+                    style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                    Resend
+                </a>
+            </p>
+        </div>
+
         <p class="error-msg" *ngIf="error">{{ error }}</p>
     </div>
 </div>
