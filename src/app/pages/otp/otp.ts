@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Auth } from '../../services/auth';
@@ -11,16 +11,38 @@ import { Auth } from '../../services/auth';
   templateUrl: './otp.html',
   styleUrl: './otp.css',
 })
-export class Otp {
+export class Otp implements OnInit {
   otpCode = '';
   error = '';
+  successMessage = '';
   email = '';
 
-  constructor(private auth: Auth, private router: Router) {
+  constructor(private auth: Auth, private router: Router, private route: ActivatedRoute) {}
+
+  ngOnInit() {
     this.email = localStorage.getItem('pendingEmail') || '';
-    if (this.auth.isLoggedIn()) {
+    console.log("OTP Component initialized. Pending email:", this.email);
+
+    // Only redirect to dashboard if logged in AND not in the middle of OTP verification
+    if (this.auth.isLoggedIn() && !this.email) {
+      console.log("User is logged in but no pending email, redirecting to dashboard");
       this.router.navigate(['/dashboard']);
+      return;
     }
+
+    // If no pending email and not logged in, redirect to login
+    if (!this.email) {
+      console.log("No pending email found, redirecting to login");
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    // Get success message from registration
+    this.route.queryParams.subscribe(params => {
+      if (params['message']) {
+        this.successMessage = params['message'];
+      }
+    });
   }
 
   verify() {
@@ -31,14 +53,13 @@ export class Otp {
 
     this.auth.verifyOtp(this.email, this.otpCode).subscribe({
       next: (res) => {
-        if (res.token) {
-          localStorage.setItem('token', res.token);
-          localStorage.removeItem('pendingEmail'); // Clean up
-          this.router.navigate(['/dashboard']);
-        }
+        // Backend doesn't return a token on OTP verification success
+        // User must log in after account activation
+        localStorage.removeItem('pendingEmail');
+        this.router.navigate(['/login'], { queryParams: { verified: 'true' } });
       },
-      error: () => {
-        this.error = 'Invalid OTP';
+      error: (err) => {
+        this.error = typeof err === 'string' ? err : 'Invalid OTP';
       }
     });
   }

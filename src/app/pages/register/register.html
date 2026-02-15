@@ -4,7 +4,7 @@
     <form (ngSubmit)="register()" #registerForm="ngForm">
       <div class="form-section">
         <h3>Agency Information</h3>
-        <input type="text" placeholder="Agency Name *" [(ngModel)]="agencyName" name="agencyName" required minlength="3"
+        <input type="text" placeholder="Agency Name *" [(ngModel)]="agencyName" name="agencyName" required
           [class.error]="errors['agencyName']" />
         <div class="error-text" *ngIf="errors['agencyName']">{{ errors["agencyName"] }}</div>
         <input type="text" placeholder="City * (e.g., Tunis, Sfax, Sousse)" [(ngModel)]="agencyCity" name="agencyCity"
@@ -14,29 +14,35 @@
         </datalist>
         <div class="error-text" *ngIf="errors['agencyCity']">{{ errors["agencyCity"] }}</div>
         <input type="text" placeholder="Full Address *" [(ngModel)]="agencyAddress" name="agencyAddress" required
-          minlength="10" [class.error]="errors['agencyAddress']" />
+          [class.error]="errors['agencyAddress']" />
         <div class="error-text" *ngIf="errors['agencyAddress']">{{ errors["agencyAddress"] }}</div>
         <input type="text" placeholder="ZIP Code * (4 digits)" [(ngModel)]="agencyZip" name="agencyZip" required
-          maxlength="4" pattern="[0-9]{4}" [class.error]="errors['agencyZip']" />
+          [class.error]="errors['agencyZip']" />
         <div class="error-text" *ngIf="errors['agencyZip']">{{ errors["agencyZip"] }}</div>
       </div>
       <div class="form-section">
         <h3>Manager Information</h3>
         <div style="display: flex; gap: 1rem;"><input type="text" placeholder="First Name *"
-            [(ngModel)]="managerFirstName" name="managerFirstName" required minlength="2"
-            [class.error]="errors['managerFirstName']" style="flex: 1;" /><input type="text" placeholder="Last Name *"
-            [(ngModel)]="managerLastName" name="managerLastName" required minlength="2"
-            [class.error]="errors['managerLastName']" style="flex: 1;" /></div>
+            [(ngModel)]="managerFirstName" name="managerFirstName" required [class.error]="errors['managerFirstName']"
+            style="flex: 1;" /><input type="text" placeholder="Last Name *" [(ngModel)]="managerLastName"
+            name="managerLastName" required [class.error]="errors['managerLastName']" style="flex: 1;" /></div>
         <div class="error-text" *ngIf="errors['managerFirstName']">{{ errors["managerFirstName"] }}</div>
         <input type="tel" placeholder="Phone * (8 digits, e.g., 20123456)" [(ngModel)]="managerPhone"
-          name="managerPhone" required maxlength="8" pattern="[2459][0-9]{7}" [class.error]="errors['managerPhone']" />
+          name="managerPhone" required [class.error]="errors['managerPhone']" />
         <div class="error-text" *ngIf="errors['managerPhone']">{{ errors["managerPhone"] }}</div>
         <input type="email" placeholder="Email *" [(ngModel)]="email" name="email" required
           [class.error]="errors['email']" />
         <div class="error-text" *ngIf="errors['email']">{{ errors["email"] }}</div>
       </div>
       <div class="form-section">
-        <h3>Security</h3>
+        <h3>Security & Legal</h3>
+        <input type="text" placeholder="Matricule Fiscale * (e.g., 1234567A001)" [(ngModel)]="legalTaxId"
+          name="legalTaxId" required [class.error]="errors['legalTaxId']" />
+        <div class="error-text" *ngIf="errors['legalTaxId']">{{ errors["legalTaxId"] }}</div>
+        <input type="text" placeholder="CIN / Passport *" [(ngModel)]="cinPassport" name="cinPassport" required
+          [class.error]="errors['cinPassport']" />
+        <div class="error-text" *ngIf="errors['cinPassport']">{{ errors["cinPassport"] }}</div>
+
         <input type="password" placeholder="Password * (8+ chars, upper, lower, number)" [(ngModel)]="password"
           name="password" required minlength="8" [class.error]="errors['password']" />
         <div class="error-text" *ngIf="errors['password']">{{ errors["password"] }}</div>

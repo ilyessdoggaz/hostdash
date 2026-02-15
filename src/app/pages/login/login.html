@@ -24,6 +24,8 @@
         Password?</a>
     </div>
 
+    <p class="success-msg" *ngIf="successMessage" style="color: #10B981; text-align: center; margin-bottom: 1rem;">{{
+      successMessage }}</p>
     <p class="error-msg" *ngIf="error">{{ error }}</p>
 
     <p style="text-align: center; margin-top: 1rem;">

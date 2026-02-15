@@ -20,7 +20,7 @@ export interface AuthResponse {
   providedIn: "root",
 })
 export class Auth {
-  private apiUrl = "http://localhost:8080/api/auth";
+  private apiUrl = "/api/auth";
 
   private readonly demoEmail = "test@test.com";
   private readonly demoPassword = "new";
@@ -32,15 +32,16 @@ export class Auth {
 
   login(email: string, password: string): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>(`${this.apiUrl}/login`, { email, password })
+      .post<{ token: string }>(`${this.apiUrl}/login`, { email, password })
       .pipe(
         map((response) => {
-          this.currentEmail = response.email || null;
+          this.currentEmail = email; // Backend doesn't return email, so we use the input
           if (response.token) {
             localStorage.setItem("token", response.token);
-            localStorage.setItem("user", JSON.stringify(response));
+            // We store a minimal user object since the backend only returns a token
+            localStorage.setItem("user", JSON.stringify({ email, token: response.token }));
           }
-          return response;
+          return { ...response, email };
         }),
         catchError((error) => {
           return throwError(() => error.error?.message || "Login failed");
@@ -50,13 +51,9 @@ export class Auth {
 
   verifyOtp(email: string, otpCode: string): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>(`${this.apiUrl}/verify-otp`, { email, code: otpCode })
+      .post<AuthResponse>(`${this.apiUrl}/verify-otp`, { email, otpCode })
       .pipe(
         map((response) => {
-          if (response.token) {
-            localStorage.setItem("token", response.token);
-            localStorage.setItem("user", JSON.stringify(response));
-          }
           return response;
         }),
         catchError((error) => {
@@ -66,25 +63,45 @@ export class Auth {
   }
 
   register(data: any): Observable<AuthResponse> {
-    const agencyData = {
+    console.log("Auth.register called with:", data);
+
+    // If data is already flat (new version), use it. Otherwise, map it (support legacy calls).
+    const payload = data.city ? data : {
+      agencyName: data.agency?.name || data.agencyName,
+      city: data.agency?.city || data.agencyCity,
+      address: data.agency?.address || data.agencyAddress,
+      zipCode: data.agency?.zip || data.agencyZip,
+      matriculeFiscale: data.legal?.taxId || data.legalTaxId,
+      firstName: data.manager?.firstName || data.managerFirstName,
+      lastName: data.manager?.lastName || data.managerLastName,
+      cinPassport: data.legal?.cin || data.cinPassport || "",
+      phone: data.manager?.phone || data.managerPhone,
       email: data.manager?.email || data.email,
       password: data.password,
-      name: data.agency?.name || data.agencyName,
-      phoneNumber: data.manager?.phone || data.managerPhone,
-      adminCin: "",
-      rne: data.legal?.rc || data.legalRc || "",
-      taxId: data.legal?.taxId || data.legalTaxId || ""
+      confirmPassword: data.confirmPassword || data.password
     };
 
     return this.http
-      .post<AuthResponse>(`${this.apiUrl}/register/host`, agencyData)
+      .post<AuthResponse>(`${this.apiUrl}/register`, payload, {
+        headers: { 'Content-Type': 'application/json' }
+      })
       .pipe(
         map((response) => {
-          this.currentEmail = response.email || null;
+          console.log("Auth.register success response:", response);
           return response;
         }),
         catchError((error) => {
-          return throwError(() => error.error?.message || "Registration failed");
+          console.error("Auth.register ERROR HTTP:", error.status, error.statusText);
+          console.error("Error Body from Backend:", error.error);
+
+          let errorMessage = "Registration failed.";
+          if (error.status === 403) {
+            errorMessage = "Server rejected the request (403 Forbidden). This usually means a security blockage (CSRF or Invalid Session).";
+          } else if (error.error && error.error.message) {
+            errorMessage = error.error.message;
+          }
+
+          return throwError(() => ({ ...error, customMessage: errorMessage }));
         })
       );
   }

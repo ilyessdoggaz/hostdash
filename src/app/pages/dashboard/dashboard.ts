@@ -33,6 +33,17 @@ export class Dashboard implements AfterViewInit, OnInit {
 
   ngOnInit() {
     this.currentUser = this.auth.getCurrentUser();
+
+    // Fallback to temp registration info for personalized feel
+    if (this.currentUser && !this.currentUser.firstName) {
+      const storedInfo = localStorage.getItem('tempRegistrationInfo');
+      if (storedInfo) {
+        const info = JSON.parse(storedInfo);
+        this.currentUser.firstName = info.firstName;
+        this.currentUser.lastName = info.lastName;
+        this.currentUser.agencyName = info.agencyName;
+      }
+    }
   }
 
   ngAfterViewInit() {

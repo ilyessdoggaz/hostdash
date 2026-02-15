@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { FormsModule } from "@angular/forms";
 import { CommonModule } from "@angular/common";
@@ -12,7 +12,7 @@ import { Auth } from "../../services/auth";
   templateUrl: "./register.html",
   styleUrl: "./register.css",
 })
-export class Register {
+export class Register implements OnInit {
   // Agency Info
   agencyName = "";
   agencyCity = "";
@@ -28,6 +28,7 @@ export class Register {
   email = "";
   password = "";
   confirmPassword = "";
+  cinPassport = "";
 
   // Legal Info
   legalName = "";
@@ -57,11 +58,28 @@ export class Register {
   readonly rcPattern = /^[A-Za-z]?\d{6,8}$/;
 
   // Tunisia Tax ID pattern (Matricule Fiscal)
-  readonly taxIdPattern = /^\d{7}[A-Za-z]\d{3}$/;
+  readonly taxIdPattern = /^\d{7}[A-Z]\d{3}$/;
+
+  currentUser: any; // Added for ngOnInit
 
   constructor(private auth: Auth, private router: Router) {
     if (this.auth.isLoggedIn()) {
       this.router.navigate(['/dashboard']);
+    }
+  }
+
+  ngOnInit() {
+    this.currentUser = this.auth.getCurrentUser();
+
+    // If we only have a token and email (from backend login), look for extra info in local storage
+    if (this.currentUser && !this.currentUser.firstName) {
+      const storedInfo = localStorage.getItem('tempRegistrationInfo');
+      if (storedInfo) {
+        const info = JSON.parse(storedInfo);
+        this.currentUser.firstName = info.firstName;
+        this.currentUser.lastName = info.lastName;
+        this.currentUser.agencyName = info.agencyName;
+      }
     }
   }
 
@@ -97,30 +115,8 @@ export class Register {
       this.errors["agencyZip"] = "ZIP code is required";
       isValid = false;
     } else if (!this.zipPattern.test(this.agencyZip)) {
-      this.errors["agencyZip"] = "ZIP code must be 4 digits (e.g., 1000 for Tunis)";
+      this.errors["agencyZip"] = "ZIP code must be 4 digits (e.g., 1000)";
       isValid = false;
-    } else {
-      // Validate ZIP matches city (basic check)
-      const zipPrefix = this.agencyZip.substring(0, 2);
-      const cityZipMap: { [key: string]: string[] } = {
-        "tunis": ["10"],
-        "sfax": ["30"],
-        "sousse": ["40"],
-        "kairouan": ["31"],
-        "bizerte": ["70"],
-        "gabes": ["60"],
-        "ariana": ["20"],
-        "gafsa": ["21"],
-        "monastir": ["50"],
-        "ben arous": ["20"],
-        "nabeul": ["80"],
-      };
-
-      const cityLower = this.agencyCity.toLowerCase();
-      if (cityZipMap[cityLower] && !cityZipMap[cityLower].includes(zipPrefix)) {
-        this.errors["agencyZip"] = `ZIP code does not match ${this.agencyCity}. Expected prefix: ${cityZipMap[cityLower].join(" or ")}`;
-        isValid = false;
-      }
     }
 
     // Manager First Name
@@ -182,8 +178,16 @@ export class Register {
       isValid = false;
     }
 
-    if (this.legalTaxId && !this.taxIdPattern.test(this.legalTaxId)) {
+    if (!this.legalTaxId) {
+      this.errors["legalTaxId"] = "Tax ID (Matricule Fiscale) is required";
+      isValid = false;
+    } else if (!this.taxIdPattern.test(this.legalTaxId)) {
       this.errors["legalTaxId"] = "Invalid Tax ID format (7 digits + 1 letter + 3 digits, e.g., 1234567A001)";
+      isValid = false;
+    }
+
+    if (!this.cinPassport) {
+      this.errors["cinPassport"] = "CIN or Passport is required";
       isValid = false;
     }
 
@@ -196,8 +200,11 @@ export class Register {
   }
 
   register() {
-    // Clear previous errors
+    // Clear previous errors and any existing auth session
     this.error = "";
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("pendingEmail");
 
     // Validate all fields
     if (!this.validate()) {
@@ -205,40 +212,68 @@ export class Register {
       return;
     }
 
-    this.auth
-      .register({
-        agency: {
-          name: this.agencyName,
-          city: this.agencyCity,
-          address: this.agencyAddress,
-          zip: this.agencyZip,
-        },
-        manager: {
-          firstName: this.managerFirstName,
-          lastName: this.managerLastName,
-          email: this.email,
-          phone: this.managerPhone,
-        },
-        legal: {
-          legalName: this.legalName,
-          rc: this.legalRc,
-          taxId: this.legalTaxId,
-        },
-        password: this.password,
-      })
-      .subscribe({
-        next: (res) => {
-          // Store email for OTP verification
-          const emailToVerify = res.email || this.email;
-          localStorage.setItem("pendingEmail", emailToVerify);
+    const payload = {
+      agencyName: this.agencyName,
+      city: this.agencyCity,
+      address: this.agencyAddress,
+      zipCode: this.agencyZip,
+      matriculeFiscale: this.legalTaxId,
+      firstName: this.managerFirstName,
+      lastName: this.managerLastName,
+      cinPassport: this.cinPassport,
+      phone: this.managerPhone,
+      email: this.email,
+      password: this.password,
+      confirmPassword: this.confirmPassword
+    };
 
-          // Redirect to OTP verification page
-          this.router.navigate(["/otp"]);
+    console.log("Submitting registration to backend:", payload);
+
+    this.auth
+      .register(payload)
+      .subscribe({
+        next: (res: any) => {
+          console.log("Registration success! Full response:", res);
+
+          // Store metadata for personalized dashboard and OTP verification
+          localStorage.setItem("pendingEmail", this.email);
+          localStorage.setItem("tempRegistrationInfo", JSON.stringify({
+            firstName: this.managerFirstName,
+            lastName: this.managerLastName,
+            agencyName: this.agencyName
+          }));
+
+          const successMsg = res.message || "Registration successful!";
+          console.log("Navigating to OTP with message:", successMsg);
+
+          // Explicitly navigate to /otp
+          this.router.navigate(["/otp"], {
+            queryParams: { message: successMsg }
+          }).then(success => {
+            if (success) console.log("Navigation to OTP successful");
+            else console.error("Navigation to OTP failed");
+          });
         },
         error: (err) => {
-          this.error = typeof err === 'string' ? err : "Registration failed. Please try again.";
+          console.error("Registration request failed HTTP Error:", err);
+
+          if (err.status === 0) {
+            this.error = "Cannot connect to backend. Please ensure Spring Boot is running on port 8080.";
+          } else if (err.status === 403) {
+            this.error = "403 Forbidden: Your backend rejected this request. Technical details: " +
+              (err.error?.message || err.error?.error || "No message provided. This often means CSRF is enabled on your backend or CORS is blocked.");
+          } else if (err.error && typeof err.error === 'object') {
+            const errorKeys = Object.keys(err.error);
+            if (errorKeys.length > 0 && errorKeys[0] !== 'message' && errorKeys[0] !== 'error') {
+              this.error = "Validation Error: " + Object.values(err.error).join(", ");
+              this.errors = err.error;
+            } else {
+              this.error = err.error.message || err.error.error || "Registration failed.";
+            }
+          } else {
+            this.error = err.customMessage || "Registration failed. Please check your data or backend connectivity.";
+          }
         },
       });
   }
 }
-

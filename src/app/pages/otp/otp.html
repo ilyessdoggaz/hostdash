@@ -13,6 +13,12 @@
         </form>
 
         <div style="text-align: center; margin-top: 1rem;">
+            <p class="success-msg" *ngIf="successMessage"
+                style="color: #10B981; text-align: center; margin-bottom: 1rem;">{{ successMessage }}</p>
+            <p class="info-msg" *ngIf="!successMessage"
+                style="text-align: center; margin-bottom: 1.5rem; color: var(--text-muted);">
+                We've sent a 6-digit code to {{email}}
+            </p>
             <p style="font-size: 0.875rem; color: var(--text-muted);">
                 Didn't receive the code?
                 <a href="javascript:void(0)" (click)="resend()"

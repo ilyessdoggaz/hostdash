@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Auth } from '../../services/auth';
@@ -15,15 +15,25 @@ export class Login {
   email = '';
   password = '';
   error = '';
+  successMessage = '';
 
   constructor(
     private auth: Auth,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     // Redirect if already logged in
     if (this.auth.isLoggedIn()) {
       this.router.navigate(['/dashboard']);
     }
+  }
+
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['verified'] === 'true') {
+        this.successMessage = 'Account activated successfully! Please login.';
+      }
+    });
   }
 
   login() {
@@ -38,8 +48,8 @@ export class Login {
           this.router.navigate(['/dashboard']);
         }
       },
-      error: () => {
-        this.error = 'Invalid credentials';
+      error: (err) => {
+        this.error = typeof err === 'string' ? err : 'Invalid credentials. Please check your email and password.';
       }
     });
   }
