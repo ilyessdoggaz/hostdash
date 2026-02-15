@@ -1,15 +1,13 @@
 package com.cubeit.erp_agence.service;
 
+import com.cubeit.erp_agence.dto.RegisterRequest;
 import com.cubeit.erp_agence.model.Agency;
 import com.cubeit.erp_agence.repository.AgencyRepository;
-import com.cubeit.erp_agence.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Random;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -18,59 +16,66 @@ public class AuthService {
     private final AgencyRepository agencyRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
-    private final JwtUtils jwtUtils;
+    private final JwtService jwtService;
 
-    public String register(Agency agency) {
-        if (agencyRepository.existsByEmail(agency.getEmail())) {
-            throw new RuntimeException("Email déjà utilisé");
+    public String register(RegisterRequest request) {
+        if (agencyRepository.existsByEmail(request.email())) {
+            throw new RuntimeException("Erreur : Cet email est déjà utilisé !");
+        }
+        if (agencyRepository.existsByMatriculeFiscale(request.matriculeFiscale())) {
+            throw new RuntimeException("Erreur : Cette matricule fiscale existe déjà !");
         }
 
-        agency.setPassword(passwordEncoder.encode(agency.getPassword()));
-
-        // Génération OTP
-        String otp = String.format("%06d", new Random().nextInt(999999));
-        agency.setOtpCode(otp);
-        agency.setOtpExpiration(LocalDateTime.now().plusMinutes(10));
-
-        // Création de la session de vérification
-        String sessionId = UUID.randomUUID().toString();
-        agency.setVerificationSessionId(sessionId);
+        Agency agency = Agency.builder()
+                .agencyName(request.agencyName())
+                .city(request.city())
+                .address(request.address())
+                .zipCode(request.zipCode())
+                .matriculeFiscale(request.matriculeFiscale())
+                .firstName(request.firstName())
+                .lastName(request.lastName())
+                .cinPassport(request.cinPassport())
+                .phone(request.phone())
+                .email(request.email())
+                .password(passwordEncoder.encode(request.password()))
+                .isVerified(false)
+                .otpCode(generateOTP())
+                .build();
 
         agencyRepository.save(agency);
-        emailService.sendOtp(agency.getEmail(), otp);
-
-        return sessionId;
+        emailService.sendOtpEmail(agency.getEmail(), agency.getOtpCode());
+        return "Inscription réussie. Code OTP envoyé.";
     }
 
-    public void verifyOtp(String sessionId, String code) {
-        Agency agency = agencyRepository.findByVerificationSessionId(sessionId)
-                .orElseThrow(() -> new RuntimeException("Session de vérification invalide"));
-
-        if (agency.getOtpExpiration().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Le code a expiré");
-        }
-        if (!agency.getOtpCode().equals(code)) {
-            throw new RuntimeException("Code incorrect");
-        }
-
-        agency.setOtpCode(null);
-        agency.setVerificationSessionId(null); // Session terminée
-        agency.setStatus("PENDING_DOCS");
-        agencyRepository.save(agency);
-    }
-
-    public String login(String email, String rawPassword) {
+    public void verifyOtp(String email, String code) {
         Agency agency = agencyRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Identifiants incorrects"));
+                .orElseThrow(() -> new RuntimeException("Agence non trouvée."));
 
-        if (!passwordEncoder.matches(rawPassword, agency.getPassword())) {
-            throw new RuntimeException("Identifiants incorrects");
+        if (agency.getOtpCode() != null && agency.getOtpCode().equals(code)) {
+            agency.setVerified(true);
+            agency.setOtpCode(null);
+            agencyRepository.save(agency);
+        } else {
+            throw new RuntimeException("Code OTP invalide.");
+        }
+    }
+
+    public String login(String email, String password) {
+        Agency agency = agencyRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Identifiants incorrects."));
+
+        if (!agency.isVerified()) {
+            throw new RuntimeException("Compte non vérifié. Veuillez valider votre OTP.");
         }
 
-        if ("PENDING_VERIFICATION".equals(agency.getStatus())) {
-            throw new RuntimeException("Veuillez d'abord vérifier votre email");
+        if (passwordEncoder.matches(password, agency.getPassword())) {
+            return jwtService.generateToken(agency.getEmail());
+        } else {
+            throw new RuntimeException("Identifiants incorrects.");
         }
+    }
 
-        return jwtUtils.generateToken(agency.getEmail(), agency.getRole(), agency.getStatus());
+    private String generateOTP() {
+        return String.format("%06d", new Random().nextInt(999999));
     }
 }

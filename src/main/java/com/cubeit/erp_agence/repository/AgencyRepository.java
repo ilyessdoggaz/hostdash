@@ -2,16 +2,22 @@ package com.cubeit.erp_agence.repository;
 
 import com.cubeit.erp_agence.model.Agency;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
 import java.util.Optional;
 
+@Repository
 public interface AgencyRepository extends MongoRepository<Agency, String> {
 
-    // Utilisé pour le Login et la vérification d'existence
-    Optional<Agency> findByEmail(String email);
-
-    // Utilisé pour éviter les doublons à l'inscription
+    // Pour vérifier si l'email existe déjà lors de l'inscription
     boolean existsByEmail(String email);
 
-    // LA LIGNE MANQUANTE : Utilisée pour retrouver l'agence via le token de session OTP
-    Optional<Agency> findByVerificationSessionId(String verificationSessionId);
+    // Pour vérifier si la matricule existe déjà
+    boolean existsByMatriculeFiscale(String matriculeFiscale);
+
+    // Utile pour le Login
+    Optional<Agency> findByEmail(String email);
+
+    // Utile pour la vérification OTP
+    Optional<Agency> findByEmailAndOtpCode(String email, String otpCode);
 }

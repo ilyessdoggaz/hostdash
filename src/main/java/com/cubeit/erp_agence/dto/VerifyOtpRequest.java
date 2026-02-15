@@ -1,23 +1,22 @@
 package com.cubeit.erp_agence.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class VerifyOtpRequest {
 
-    @NotBlank
-    @Schema(
-            description = "L'identifiant unique de session reçu en réponse de l'endpoint /register",
-            example = "550e8400-e29b-41d4-a716-446655440000"
-    )
-    private String sessionId;
+    @NotBlank(message = "L'email est obligatoire")
+    @Email(message = "Format d'email invalide")
+    private String email;
 
-    @NotBlank
-    @Schema(
-            description = "Le code à 6 chiffres reçu par email via Mailtrap",
-            example = "123456"
-    )
-    private String code;
+    @NotBlank(message = "Le code OTP est obligatoire")
+    @Pattern(regexp = "^\\d{6}$", message = "Le code OTP doit contenir exactement 6 chiffres")
+    private String otpCode;
 }
