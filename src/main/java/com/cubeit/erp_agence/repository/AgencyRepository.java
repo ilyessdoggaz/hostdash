@@ -5,7 +5,13 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.Optional;
 
 public interface AgencyRepository extends MongoRepository<Agency, String> {
+
+    // Utilisé pour le Login et la vérification d'existence
     Optional<Agency> findByEmail(String email);
+
+    // Utilisé pour éviter les doublons à l'inscription
     boolean existsByEmail(String email);
-    boolean existsByRne(String rne);
+
+    // LA LIGNE MANQUANTE : Utilisée pour retrouver l'agence via le token de session OTP
+    Optional<Agency> findByVerificationSessionId(String verificationSessionId);
 }

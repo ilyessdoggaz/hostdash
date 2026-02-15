@@ -12,24 +12,35 @@ public class Agency {
     @Id
     private String id;
 
-    // --- Admin Info ---
     @Indexed(unique = true)
-    private String email;          // Email pro [cite: 29]
+    private String email;
+
     private String password;
-    private String phoneNumber;    // [cite: 30]
-    private String adminCin;       // [cite: 28]
 
-    // --- Agence Info (Juridique) ---
+    @Indexed
+    private String phoneNumber;
+
+    @Indexed
+    private String adminCin;
+
+    @Indexed
     private String name;
-    @Indexed(unique = true)
-    private String rne;            // [cite: 24]
-    private String taxId;          // Patente [cite: 25]
 
-    // --- Statut & Sécurité ---
+    @Indexed(unique = true)
+    private String rne;
+
+    @Indexed
+    private String taxId;
+
+    // Champs pour la validation OTP par session
     private String otpCode;
     private LocalDateTime otpExpiration;
 
-    // PENDING_VERIFICATION (Email non validé) -> PENDING_APPROVAL (Attente admin) -> ACTIVE
+    @Indexed // Indexé pour retrouver rapidement l'agence durant la vérification
+    private String verificationSessionId;
+
+    @Indexed
     private String status = "PENDING_VERIFICATION";
+
     private String role = "ROLE_AGENCE";
 }

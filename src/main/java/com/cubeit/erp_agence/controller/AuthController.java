@@ -15,27 +15,30 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth/agence")
 @RequiredArgsConstructor
-@Tag(name = "1. Authentification Agence", description = "Endpoints pour l'inscription, l'OTP et le Login JWT")
+@Tag(name = "1. Authentification Agence")
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("/register")
-    @Operation(summary = "Inscription initiale", description = "Crée le compte et envoie l'OTP via Mailtrap.")
+    @Operation(summary = "Inscription", description = "Retourne un verificationSessionId à utiliser pour l'OTP.")
     public ResponseEntity<?> register(@RequestBody Agency agency) {
-        authService.register(agency);
-        return ResponseEntity.ok("Agence créée. Vérifiez Mailtrap pour l'OTP.");
+        String sessionId = authService.register(agency);
+        return ResponseEntity.ok(Map.of(
+                "message", "Agence créée. Vérifiez vos emails.",
+                "verificationSessionId", sessionId
+        ));
     }
 
     @PostMapping("/verify-otp")
-    @Operation(summary = "Vérification Email", description = "Valide le code OTP.")
+    @Operation(summary = "Vérification OTP", description = "Utilise le sessionId reçu lors du register.")
     public ResponseEntity<?> verify(@RequestBody VerifyOtpRequest request) {
-        authService.verifyOtp(request.getEmail(), request.getCode());
-        return ResponseEntity.ok("Email vérifié.");
+        // Note: Assurez-vous que votre DTO VerifyOtpRequest contient 'sessionId' au lieu de 'email'
+        authService.verifyOtp(request.getSessionId(), request.getCode());
+        return ResponseEntity.ok("Email vérifié avec succès.");
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Connexion JWT", description = "Retourne un token Bearer si vérifié.")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         String token = authService.login(request.getEmail(), request.getPassword());
         return ResponseEntity.ok(Map.of("token", token));
