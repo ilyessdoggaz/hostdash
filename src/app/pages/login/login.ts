@@ -39,17 +39,19 @@ export class Login {
   login() {
     this.auth.login(this.email, this.password).subscribe({
       next: (res) => {
-        if (res.requiresOtp) {
-          // Store email for OTP verification
+        if (res.requires2FA) {
+          // Store email and action for 2FA verification
           localStorage.setItem('pendingEmail', this.email);
+          localStorage.setItem('pendingAction', 'login');
           this.router.navigate(['/otp']);
         } else if (res.token) {
-          // Successfully logged in
+          // Successfully logged in (if 2FA is disabled on backend)
           this.router.navigate(['/dashboard']);
         }
       },
       error: (err) => {
-        this.error = typeof err === 'string' ? err : 'Invalid credentials. Please check your email and password.';
+        console.error("Login Error:", err);
+        this.error = typeof err === 'string' ? err : 'Invalid email or password';
       }
     });
   }

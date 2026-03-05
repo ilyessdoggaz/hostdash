@@ -2,8 +2,8 @@
   <nav class="sidebar">
     <div class="logo">Hostdash</div>
     <ul>
-      <li class="active">Dashboard</li>
-      <li>My Cars</li>
+      <li (click)="router.navigate(['/dashboard'])">Dashboard</li>
+      <li (click)="router.navigate(['/my-cars'])">My Cars</li>
       <li>Bookings</li>
       <li>Earnings</li>
       <li class="logout" (click)="logout()">Logout</li>
@@ -12,14 +12,24 @@
 
   <main class="content">
     <header>
-      <h1>Welcome back, <span style="color: var(--primary);">{{currentUser?.firstName || 'Host'}}</span></h1>
-      <div class="user-profile">{{currentUser?.firstName}} {{currentUser?.lastName || ''}}</div>
+      <div class="header-main">
+        <h1>Welcome back, <span style="color: var(--primary);">{{hostProfile?.agencyName || currentUser?.firstName ||
+            'Host'}}</span></h1>
+        <button class="add-car-btn" (click)="router.navigate(['/add-car'])">
+          <span class="material-icons">add</span>
+          Add New Car
+        </button>
+      </div>
+      <button class="profile-entry" (click)="router.navigate(['/profile'])">
+        <img *ngIf="hostProfile?.agencyLogo" [src]="hostProfile.agencyLogo" alt="Profile" class="header-logo">
+        <span *ngIf="!hostProfile?.agencyLogo" class="material-icons">account_circle</span>
+      </button>
     </header>
 
     <div class="stats-grid">
       <div class="stat-card">
         <h3>Total Earnings</h3>
-        <p class="value">$0.00</p>
+        <p class="value">0.000 DT</p>
       </div>
       <div class="stat-card">
         <h3>Active Rentals</h3>
@@ -27,7 +37,7 @@
       </div>
       <div class="stat-card">
         <h3>Available Cars</h3>
-        <p class="value">2</p>
+        <p class="value">{{availableCount}}</p>
       </div>
     </div>
 
@@ -41,26 +51,6 @@
         </div>
       </div>
       <div id="google-map" class="google-map-container"></div>
-    </div>
-
-    <div class="dashboard-card recent-activity">
-      <h3>Recent Activity</h3>
-      <div class="activity-list">
-        <div class="activity-item">
-          <div class="activity-icon"><i class="material-icons">event</i></div>
-          <div class="activity-details">
-            <strong>John Doe</strong> booked Volkswagen Golf
-            <p>2 hours ago</p>
-          </div>
-        </div>
-        <div class="activity-item">
-          <div class="activity-icon"><i class="material-icons">done</i></div>
-          <div class="activity-details">
-            <strong>Ahmed S.</strong> completed rental for Renault Clio
-            <p>Yesterday</p>
-          </div>
-        </div>
-      </div>
     </div>
   </main>
 </div>

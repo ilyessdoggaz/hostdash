@@ -54,7 +54,33 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 30px;
+}
+
+.header-main {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.add-car-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.add-car-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
 }
 
 .stats-grid {
@@ -148,9 +174,10 @@ header {
 
 .google-map-container {
   width: 100%;
-  height: 450px;
+  height: 600px;
   border-radius: var(--radius);
   overflow: hidden;
+  border: 1px solid #e5e7eb;
 }
 
 /* Responsive */
@@ -233,4 +260,49 @@ header {
   margin: 0;
   font-size: 0.8rem;
   color: var(--text-muted);
+}
+
+.profile-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 50%;
+  width: 54px;
+  height: 54px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+  overflow: hidden;
+}
+
+.profile-entry:hover {
+  border-color: var(--primary);
+  background: white;
+  transform: translateY(-1px);
+}
+
+.profile-entry .material-icons {
+  color: #9ca3af;
+  font-size: 32px;
+  transition: color 0.2s;
+}
+
+.header-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.profile-entry span:not(.material-icons) {
+  display: none;
+  /* Hide 'Profile' text to fit 60x60 square */
+}
+
+.profile-entry:hover .material-icons {
+  color: var(--primary);
 }

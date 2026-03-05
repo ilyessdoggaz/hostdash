@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { API_BASE_URL } from "../api.config";
 import { HttpClient } from "@angular/common/http";
 import { Observable, of, throwError } from "rxjs";
 import { catchError, map, delay } from "rxjs/operators";
@@ -12,17 +13,20 @@ export interface AuthResponse {
   role?: string;
   verified?: boolean;
   requiresOtp?: boolean;
+  requires2FA?: boolean;
   message?: string;
   status?: string;
+  agencyId?: string;
+  agenceId?: string;
 }
 
 @Injectable({
   providedIn: "root",
 })
 export class Auth {
-  private apiUrl = "/api/auth";
+  private apiUrl = `${API_BASE_URL}/auth`;
 
-  private readonly demoEmail = "test@test.com";
+  private readonly demoEmail = "test@gmail.com";
   private readonly demoPassword = "new";
   private readonly demoOtp = "123456";
 
@@ -32,20 +36,18 @@ export class Auth {
 
   login(email: string, password: string): Observable<AuthResponse> {
     return this.http
-      .post<{ token: string }>(`${this.apiUrl}/login`, { email, password })
+      .post<AuthResponse>(`${this.apiUrl}/login`, { email, password })
       .pipe(
         map((response) => {
-          this.currentEmail = email; // Backend doesn't return email, so we use the input
+          this.currentEmail = email;
           if (response.token) {
             localStorage.setItem("token", response.token);
-            // We store a minimal user object since the backend only returns a token
-            localStorage.setItem("user", JSON.stringify({ email, token: response.token }));
+            // Save the full response to capture role, agencyId, etc.
+            localStorage.setItem("user", JSON.stringify({ ...response, email }));
           }
           return { ...response, email };
         }),
-        catchError((error) => {
-          return throwError(() => error.error?.message || "Login failed");
-        })
+        catchError(this.handleError.bind(this))
       );
   }
 
@@ -53,19 +55,12 @@ export class Auth {
     return this.http
       .post<AuthResponse>(`${this.apiUrl}/verify-otp`, { email, otpCode })
       .pipe(
-        map((response) => {
-          return response;
-        }),
-        catchError((error) => {
-          return throwError(() => error.error?.message || "OTP verification failed");
-        })
+        map((response) => response),
+        catchError(this.handleError.bind(this))
       );
   }
 
   register(data: any): Observable<AuthResponse> {
-    console.log("Auth.register called with:", data);
-
-    // If data is already flat (new version), use it. Otherwise, map it (support legacy calls).
     const payload = data.city ? data : {
       agencyName: data.agency?.name || data.agencyName,
       city: data.agency?.city || data.agencyCity,
@@ -82,27 +77,10 @@ export class Auth {
     };
 
     return this.http
-      .post<AuthResponse>(`${this.apiUrl}/register`, payload, {
-        headers: { 'Content-Type': 'application/json' }
-      })
+      .post<AuthResponse>(`${this.apiUrl}/register`, payload)
       .pipe(
-        map((response) => {
-          console.log("Auth.register success response:", response);
-          return response;
-        }),
-        catchError((error) => {
-          console.error("Auth.register ERROR HTTP:", error.status, error.statusText);
-          console.error("Error Body from Backend:", error.error);
-
-          let errorMessage = "Registration failed.";
-          if (error.status === 403) {
-            errorMessage = "Server rejected the request (403 Forbidden). This usually means a security blockage (CSRF or Invalid Session).";
-          } else if (error.error && error.error.message) {
-            errorMessage = error.error.message;
-          }
-
-          return throwError(() => ({ ...error, customMessage: errorMessage }));
-        })
+        map((response) => response),
+        catchError(this.handleError.bind(this))
       );
   }
 
@@ -136,6 +114,47 @@ export class Auth {
   }
 
   resendOtp(email: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/resend-otp?email=${email}`, {});
+    return this.http.post<AuthResponse>(`${this.apiUrl}/resend-otp?email=${email}`, {})
+      .pipe(catchError(this.handleError.bind(this)));
+  }
+
+  verify2FA(email: string, code: string): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/verify-2fa`, { email, code })
+      .pipe(
+        map((response) => {
+          if (response.token) {
+            localStorage.setItem("token", response.token);
+            // Save the full response to capture role, agencyId, etc.
+            localStorage.setItem("user", JSON.stringify({ ...response, email }));
+          }
+          return response;
+        }),
+        catchError(this.handleError.bind(this))
+      );
+  }
+
+  private handleError(error: any) {
+    console.error('AuthService Error:', error);
+    let errorMessage = 'An error occurred. Please try again.';
+
+    if (error.status === 0) {
+      errorMessage = 'Cannot connect to backend server. Please check your internet or ensure backend is running.';
+    } else if (error.error) {
+      if (typeof error.error === 'string') {
+        errorMessage = error.error;
+      } else if (error.error.message) {
+        errorMessage = error.error.message;
+      } else if (error.error.error) {
+        errorMessage = error.error.error;
+      } else if (typeof error.error === 'object') {
+        const messages = Object.values(error.error);
+        if (messages.length > 0) errorMessage = messages.join(', ');
+      }
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
+    return throwError(() => errorMessage);
   }
 }

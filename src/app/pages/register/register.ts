@@ -237,6 +237,7 @@ export class Register implements OnInit {
 
           // Store metadata for personalized dashboard and OTP verification
           localStorage.setItem("pendingEmail", this.email);
+          localStorage.setItem("pendingAction", "register");
           localStorage.setItem("tempRegistrationInfo", JSON.stringify({
             firstName: this.managerFirstName,
             lastName: this.managerLastName,
@@ -257,21 +258,11 @@ export class Register implements OnInit {
         error: (err) => {
           console.error("Registration request failed HTTP Error:", err);
 
-          if (err.status === 0) {
+          // err is now a string thanks to the improved handleError in AuthService
+          this.error = typeof err === 'string' ? err : "Registration failed. Please try again.";
+
+          if (this.error.includes("connect to backend")) {
             this.error = "Cannot connect to backend. Please ensure Spring Boot is running on port 8080.";
-          } else if (err.status === 403) {
-            this.error = "403 Forbidden: Your backend rejected this request. Technical details: " +
-              (err.error?.message || err.error?.error || "No message provided. This often means CSRF is enabled on your backend or CORS is blocked.");
-          } else if (err.error && typeof err.error === 'object') {
-            const errorKeys = Object.keys(err.error);
-            if (errorKeys.length > 0 && errorKeys[0] !== 'message' && errorKeys[0] !== 'error') {
-              this.error = "Validation Error: " + Object.values(err.error).join(", ");
-              this.errors = err.error;
-            } else {
-              this.error = err.error.message || err.error.error || "Registration failed.";
-            }
-          } else {
-            this.error = err.customMessage || "Registration failed. Please check your data or backend connectivity.";
           }
         },
       });

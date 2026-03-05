@@ -1,0 +1,122 @@
+<div class="add-car-container">
+    <div class="header-section">
+        <button class="back-btn" (click)="goBack()">
+            <span class="material-icons">arrow_back</span>
+            Back to Dashboard
+        </button>
+        <h1>{{ isEditing ? 'Edit Vehicle' : 'Add New Vehicle' }}</h1>
+        <p>{{ isEditing ? 'Update your vehicle information below.' : 'Share your car with the community and start
+            earning.' }}</p>
+    </div>
+
+    <div class="form-card">
+        <div class="form-grid">
+            <!-- Car Details Column -->
+            <div class="detail-section">
+                <h3>Vehicle Details</h3>
+                
+                <div class="error-message" *ngIf="error">
+                    <span class="material-icons">error</span>
+                    {{error}}
+                </div>
+                
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Brand *</label>
+                        <input type="text" [(ngModel)]="carInfo.brand" placeholder="e.g. Volkswagen">
+                    </div>
+                    <div class="input-group">
+                        <label>Model *</label>
+                        <input type="text" [(ngModel)]="carInfo.model" placeholder="e.g. Golf 8">
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Matricule *</label>
+                        <input type="text" [(ngModel)]="carInfo.matricule" placeholder="e.g. 220 TN 1234">
+                    </div>
+                    <div class="input-group">
+                        <label>VIN Code</label>
+                        <input type="text" [(ngModel)]="carInfo.vincode" placeholder="e.g. VIN123456789">
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Year</label>
+                        <input type="number" [(ngModel)]="carInfo.year" min="1900" max="2030">
+                    </div>
+                    <div class="input-group">
+                        <label>Category</label>
+                        <select [(ngModel)]="carInfo.category">
+                            <option *ngFor="let category of categories" [value]="category">{{category}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Fuel Type</label>
+                        <select [(ngModel)]="carInfo.fuelType">
+                            <option *ngFor="let fuel of fuelTypes" [value]="fuel">{{fuel}}</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Price per Day (DT) *</label>
+                        <input type="number" [(ngModel)]="carInfo.pricePerDay" placeholder="120" min="1">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Description</label>
+                    <textarea [(ngModel)]="carInfo.description" rows="4"
+                        placeholder="Tell potential renters about your vehicle..."></textarea>
+                </div>
+            </div>
+
+            <!-- Image Upload Column -->
+            <div class="upload-section">
+                <h3>Vehicle Photos (Max 5)</h3>
+                <div class="drop-zone" [class.active]="isDragging" (dragover)="onDragOver($event)"
+                    (dragleave)="onDragLeave($event)" (drop)="onDrop($event)" (click)="fileInput.click()">
+                    <span class="material-icons">cloud_upload</span>
+                    <p>Drag & drop images here or <span>browse</span></p>
+                    <input #fileInput type="file" multiple (change)="onFileChange($event)" style="display: none"
+                        accept="image/*">
+                </div>
+
+                <div class="image-preview-grid">
+                    <div *ngFor="let img of selectedImages; let i = index" class="preview-item">
+                        <img [src]="img" alt="Car preview">
+                        <button class="remove-btn" (click)="removeImage(i)">
+                            <span class="material-icons">close</span>
+                        </button>
+                    </div>
+                    <div *ngFor="let placeholder of [].constructor(5 - selectedImages.length)"
+                        class="preview-placeholder">
+                        <span class="material-icons">image</span>
+                    </div>
+                </div>
+
+                <div class="action-footer">
+                    <button class="submit-btn"
+                        [disabled]="isSubmitting || !carInfo.brand || !carInfo.model || !carInfo.matricule || carInfo.pricePerDay <= 0"
+                        (click)='onSubmit()'>
+                        <span *ngIf="isSubmitting" class="material-icons spinner">autorenew</span>
+                        {{ isEditing ? 'Update Listing' : 'Create Listing' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<app-car-confirmation-dialog
+    [isOpen]="showConfirmation"
+    [vehicleData]="pendingVehicleData"
+    [images]="selectedImages"
+    [submitting]="isSubmitting"
+    (closeDialog)="closeConfirmation()"
+    (confirmCreation)="confirmCreation()">
+</app-car-confirmation-dialog>
