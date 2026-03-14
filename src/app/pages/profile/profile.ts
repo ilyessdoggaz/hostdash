@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Auth } from '../../services/auth';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
     selector: 'app-profile',
@@ -21,7 +22,11 @@ export class Profile implements OnInit {
         agencyLogo: null
     };
 
-    constructor(private auth: Auth, private router: Router) { }
+    constructor(
+        private auth: Auth, 
+        private router: Router,
+        private notificationService: NotificationService
+    ) { }
 
     ngOnInit() {
         const currentUser = this.auth.getCurrentUser();
@@ -61,7 +66,7 @@ export class Profile implements OnInit {
 
     saveProfile() {
         localStorage.setItem('hostProfile', JSON.stringify(this.user));
-        alert('Profile updated successfully!');
+        this.notificationService.showToast('Profile updated successfully!', 'success');
         this.router.navigate(['/dashboard']);
     }
 
@@ -70,9 +75,14 @@ export class Profile implements OnInit {
         this.router.navigate(['/login']);
     }
 
-    deleteAccount() {
-        if (confirm('ARE YOU SURE? This action is permanent and will delete all your data.')) {
-            alert('Account deletion requested. This would be processed by the backend in a real app.');
+    async deleteAccount() {
+        const confirmed = await this.notificationService.confirm(
+            'Delete Account',
+            'ARE YOU SURE? This action is permanent and will delete all your data.'
+        );
+
+        if (confirmed) {
+            this.notificationService.showToast('Account deletion requested.', 'info');
             this.logout();
         }
     }

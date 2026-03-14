@@ -92,8 +92,8 @@
 }
 
 .status-badge.rented {
-    background: rgba(33, 150, 243, 0.9);
-    color: white;
+    background-color: #fef2f2;
+    color: #ef4444;
 }
 
 .status-badge.maintenance {
@@ -252,4 +252,232 @@
     .details-grid {
         grid-template-columns: 1fr 1fr;
     }
+}
+
+.tracking-card {
+    text-align: center;
+    padding: 2rem;
+}
+
+.tracking-card .description {
+    color: #6B7280;
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+}
+
+.track-btn {
+    width: 100%;
+    background: #3B82F6;
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.track-btn:hover {
+    background: #2563EB;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+}
+
+.track-btn .material-icons {
+    font-size: 20px;
+}
+
+/* Availability Management Styles */
+.availability-card {
+    background: #ffffff;
+}
+
+.availability-card .description {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+}
+
+.availability-form {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    border: 1px solid #f1f5f9;
+}
+
+.form-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.form-row:last-child {
+    margin-bottom: 0;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select {
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    color: #1e293b;
+    background: white;
+    transition: all 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.block-btn {
+    align-self: flex-end;
+    background: #1e293b;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.block-btn:hover:not(:disabled) {
+    background: #0f172a;
+    transform: translateY(-1px);
+}
+
+.block-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.unavailabilities-list h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.5rem;
+}
+
+.unavailability-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s;
+}
+
+.unavailability-item:hover {
+    border-color: #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.item-info .range {
+    font-weight: 500;
+    color: #1a1a1a;
+    font-size: 0.95rem;
+}
+
+.reason-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    display: inline-block;
+    width: fit-content;
+}
+
+.reason-badge.maintenance {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.reason-badge.booked {
+    background: #f0f9ff;
+    color: #0369a1;
+}
+
+.unblock-btn {
+    background: #fee2e2;
+    color: #ef4444;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.unblock-btn:hover {
+    background: #fecaca;
+    color: #dc2626;
+}
+
+.unblock-btn .material-icons {
+    font-size: 18px;
+}
+
+.mini-loading {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.spinner-small {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #94a3b8;
+    font-style: italic;
+    font-size: 0.9rem;
 }

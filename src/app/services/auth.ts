@@ -18,6 +18,8 @@ export interface AuthResponse {
   status?: string;
   agencyId?: string;
   agenceId?: string;
+  _id?: string;
+  id?: string;
 }
 
 @Injectable({
@@ -113,8 +115,9 @@ export class Auth {
     return this.currentEmail;
   }
 
-  resendOtp(email: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/resend-otp?email=${email}`, {})
+  resendOtp(email: string, action?: string | null): Observable<AuthResponse> {
+    const payload = action ? { email, action } : { email };
+    return this.http.post<AuthResponse>(`${this.apiUrl}/resend-otp`, payload)
       .pipe(catchError(this.handleError.bind(this)));
   }
 

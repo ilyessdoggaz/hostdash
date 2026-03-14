@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map, timeout } from 'rxjs/operators';
-import { API_BASE_URL, VEHICLES_MY_CARS_PATH } from '../api.config';
+import { API_BASE_URL, VEHICLES_MY_CARS_PATH, VEHICLES_ARCHIVED_PATH } from '../api.config';
 import { Vehicle, CreateVehicleRequest, UpdatePriceRequest } from '../models/vehicle.model';
 
 @Injectable({
@@ -39,6 +39,23 @@ export class VehicleService {
       map(response => {
         const list = this.parseVehicleList(response);
         console.log('[VehicleService] Parsed', list?.length ?? 0, 'vehicles');
+        return list;
+      }),
+      catchError(err => this.handleError(err))
+    );
+  }
+
+  /**
+   * Get all archived vehicles - GET /api/vehicles/mycars/archived
+   */
+  getArchivedVehicles(): Observable<Vehicle[]> {
+    const url = `${this.apiUrl}/${VEHICLES_ARCHIVED_PATH}`;
+    console.log('[VehicleService] GET Archived', url);
+    return this.http.get<any>(url).pipe(
+      timeout(30000),
+      map(response => {
+        const list = this.parseVehicleList(response);
+        console.log('[VehicleService] Parsed', list?.length ?? 0, 'archived vehicles');
         return list;
       }),
       catchError(err => this.handleError(err))
@@ -97,6 +114,69 @@ export class VehicleService {
         catchError(this.handleError)
       );
   }
+
+  /**
+   * Archive a vehicle - POST /api/vehicles/{id}/archive
+   */
+  archiveVehicle(id: string): Observable<Vehicle> {
+    const url = `${this.apiUrl}/${id}/archive`;
+    console.log('[VehicleService] PATCH', url);
+    return this.http.patch<any>(url, {}).pipe(
+      timeout(15000),
+      map(response => {
+        console.log('[VehicleService] Raw Archive Response:', response);
+        if (response && response.id) return response;
+        if (response && response.data && response.data.id) return response.data;
+        if (response && response.vehicle && response.vehicle.id) return response.vehicle;
+        return response;
+      }),
+      catchError(err => {
+        console.error('[VehicleService] Archive Error:', err);
+        return this.handleError(err);
+      })
+    );
+  }
+
+  /**
+   * Archive a vehicle - fallback to PATCH if POST fails
+   */
+  archiveVehiclePatch(id: string): Observable<Vehicle> {
+    const url = `${this.apiUrl}/${id}/archive`;
+    console.log('[VehicleService] PATCH', url);
+    return this.http.patch<any>(url, {}).pipe(
+      timeout(15000),
+      map(response => {
+        if (response && response.id) return response;
+        if (response && response.data && response.data.id) return response.data;
+        return response;
+      }),
+      catchError(err => this.handleError(err))
+    );
+  }
+
+  /**
+   * Restore/Unarchive a vehicle - POST /api/vehicles/{id}/unarchive
+   */
+  restoreVehicle(id: string): Observable<Vehicle> {
+    const url = `${this.apiUrl}/${id}/unarchive`;
+    console.log('[VehicleService] PATCH (Restore)', url);
+    return this.http.patch<any>(url, {}).pipe(
+      timeout(15000),
+      map(response => {
+        console.log('[VehicleService] Raw Restore Response:', response);
+        if (response && response.id) return response;
+        if (response && response.data && response.data.id) return response.data;
+        if (response && response.vehicle && response.vehicle.id) return response.vehicle;
+        return response;
+      }),
+      catchError(err => {
+        console.error('[VehicleService] Restore Error:', err);
+        return this.handleError(err);
+      })
+    );
+  }
+
+
 
   /**
    * Delete a vehicle

@@ -4,109 +4,159 @@
 }
 
 .sidebar {
-  width: 250px;
-  background-color: #1f2937;
-  color: white;
+  width: 260px;
+  background-color: #0f172a; /* Deeper navy for premium feel */
+  color: #f8fafc;
   display: flex;
   flex-direction: column;
-  padding: 1.5rem;
+  padding: 1.5rem 1rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.logo {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 2rem;
-  color: var(--secondary);
-}
-
-.sidebar ul {
+.nav-list {
   list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.sidebar li {
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: var(--radius);
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  border-radius: 12px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #94a3b8;
+  font-weight: 500;
 }
 
-.sidebar li:hover {
-  background-color: #374151;
+.nav-item .material-icons {
+  font-size: 22px;
+  color: #64748b;
 }
 
-.sidebar li.active {
-  background-color: var(--primary);
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
 }
 
-.sidebar li.logout {
-  margin-top: auto;
+.nav-item:hover .material-icons {
+  color: #ffffff;
+}
+
+.nav-item.active {
+  background-color: #4f46e5;
+  color: #ffffff;
+}
+
+.nav-item.active .material-icons {
+  color: #ffffff;
+}
+
+.sidebar-footer {
+  display: none;
+}
+
+.divider {
+  display: none;
+}
+
+.nav-item.logout {
+  color: #fca5a5;
+  margin-top: 0;
+}
+
+.nav-item.logout .material-icons {
+  color: #ef4444;
+}
+
+.nav-item.logout:hover {
+  background-color: rgba(239, 68, 68, 0.1);
   color: #ef4444;
 }
 
 .content {
   flex: 1;
-  padding: 2rem;
-  overflow-y: auto;
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Prevent content scroll */
 }
 
-header {
+.compact-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 2rem;
+  background: white;
+  padding: 1.25rem 1.75rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  flex-wrap: wrap;
+  gap: 1.5rem;
 }
 
-.header-main {
+.welcome-group {
   display: flex;
-  align-items: center;
-  gap: 24px;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.add-car-btn {
+.welcome-group h1 {
+  font-size: 1.5rem;
+  color: #111827;
+  margin: 0;
+}
+
+.add-car-btn-compact {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: var(--primary);
+  gap: 6px;
+  background: #4f46e5;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+  width: fit-content;
 }
 
-.add-car-btn:hover {
+.add-car-btn-compact:hover {
+  background: #4338ca;
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+.compact-stats {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
 }
 
-.stat-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+.mini-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.stat-card h3 {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  margin-bottom: 0.5rem;
+.stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
-.stat-card .value {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--text-main);
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
 }
 
 .dashboard-card {
@@ -116,26 +166,28 @@ header {
   box-shadow: var(--shadow);
 }
 
-/* Google Map Styles */
 .dashboard-map-section {
   background: white;
-  padding: 1.5rem;
+  padding: 1.25rem;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  margin-bottom: 2rem;
+  flex: 1; /* Take remaining space */
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Important for flex child overflow */
 }
 
 .map-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   flex-wrap: wrap;
   gap: 1rem;
 }
 
-.map-header h3 {
-  font-size: 1.25rem;
+.header-info h3 {
+  font-size: 1.1rem;
   color: var(--text-main);
   margin: 0;
 }
@@ -143,7 +195,7 @@ header {
 .map-legend {
   display: flex;
   gap: 1rem;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 }
 
 .legend-item {
@@ -165,7 +217,7 @@ header {
 }
 
 .dot.available {
-  background-color: #4f46e5;
+  background-color: #10b981;
 }
 
 .dot.rented {
@@ -174,8 +226,8 @@ header {
 
 .google-map-container {
   width: 100%;
-  height: 600px;
-  border-radius: var(--radius);
+  flex: 1; /* Fill the section */
+  border-radius: 8px;
   overflow: hidden;
   border: 1px solid #e5e7eb;
 }
@@ -261,48 +313,4 @@ header {
   font-size: 0.8rem;
   color: var(--text-muted);
 }
-
-.profile-entry {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 50%;
-  width: 54px;
-  height: 54px;
-  color: #374151;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 0;
-  overflow: hidden;
-}
-
-.profile-entry:hover {
-  border-color: var(--primary);
-  background: white;
-  transform: translateY(-1px);
-}
-
-.profile-entry .material-icons {
-  color: #9ca3af;
-  font-size: 32px;
-  transition: color 0.2s;
-}
-
-.header-logo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
-.profile-entry span:not(.material-icons) {
-  display: none;
-  /* Hide 'Profile' text to fit 60x60 square */
-}
-
-.profile-entry:hover .material-icons {
-  color: var(--primary);
-}
+

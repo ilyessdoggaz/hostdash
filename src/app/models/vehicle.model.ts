@@ -14,7 +14,8 @@ export interface Vehicle {
   year: number;
   pricePerDay: number;
   category: string;
-  status: 'AVAILABLE' | 'RENTED' | 'MAINTENANCE' | 'INACTIVE';
+  isArchived?: boolean;
+  status: 'AVAILABLE' | 'RENTED' | 'MAINTENANCE' | 'INACTIVE' | 'ARCHIVED';
   images: string[];
   fuelType: string;
   createdAt: string;

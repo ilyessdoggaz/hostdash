@@ -3,6 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Auth } from '../../services/auth';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-otp',
@@ -17,7 +18,12 @@ export class Otp implements OnInit {
   successMessage = '';
   email = '';
 
-  constructor(private auth: Auth, private router: Router, private route: ActivatedRoute) { }
+  constructor(
+    private auth: Auth,
+    private router: Router,
+    private route: ActivatedRoute,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit() {
     this.email = localStorage.getItem('pendingEmail') || '';
@@ -88,15 +94,14 @@ export class Otp implements OnInit {
     if (!this.email) return;
     const action = localStorage.getItem('pendingAction');
 
-    if (action === 'login') {
-      this.error = 'For security, please go back to login to request a new 2FA code.';
-      return;
-    }
+    // Allow resending for both registration and login
 
-    this.auth.resendOtp(this.email).subscribe({
+    this.auth.resendOtp(this.email, action).subscribe({
       next: (res: any) => {
-        this.successMessage = res.message || 'A new OTP has been sent.';
+        const msg = res.message || 'A new OTP has been sent.';
+        this.successMessage = msg;
         this.error = '';
+        this.notificationService.showToast(msg, 'success');
       },
       error: (err) => {
         this.error = typeof err === 'string' ? err : 'Failed to resend OTP.';

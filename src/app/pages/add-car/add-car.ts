@@ -3,8 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { VehicleService } from '../../services/vehicle.service';
+import { IotService } from '../../services/iot.service';
 import { CreateVehicleRequest, Vehicle } from '../../models/vehicle.model';
 import { CarConfirmationDialog } from '../../components/car-confirmation-dialog/car-confirmation-dialog';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
     selector: 'app-add-car',
@@ -23,7 +25,9 @@ export class AddCar implements OnInit {
         pricePerDay: 0,
         category: 'Compact',
         fuelType: 'Petrol',
-        description: ''
+        description: '',
+        latitude: 36.8065, // Default to Tunis Capital
+        longitude: 10.1815
     };
 
     selectedImages: string[] = [];
@@ -44,7 +48,9 @@ export class AddCar implements OnInit {
 
     constructor(
         private router: Router,
-        private vehicleService: VehicleService
+        private vehicleService: VehicleService,
+        private iotService: IotService,
+        private notificationService: NotificationService
     ) { }
 
     ngOnInit() {
@@ -64,7 +70,9 @@ export class AddCar implements OnInit {
                 pricePerDay: vehicle.pricePerDay,
                 category: vehicle.category,
                 fuelType: vehicle.fuelType,
-                description: ''
+                description: '',
+                latitude: 36.8065,
+                longitude: 10.1815
             };
             
             if (vehicle.images && vehicle.images.length > 0) {
@@ -99,7 +107,7 @@ export class AddCar implements OnInit {
 
     private handleFiles(files: FileList) {
         if (this.selectedImages.length + files.length > 5) {
-            alert('You can only upload a maximum of 5 images.');
+            this.notificationService.showToast('You can only upload a maximum of 5 images.', 'warning');
             return;
         }
 
@@ -139,9 +147,8 @@ export class AddCar implements OnInit {
         }
         
         if (this.selectedImages.length === 0) {
-            if (!confirm('No images uploaded. Continue without images?')) {
-                return;
-            }
+            this.error = 'Please upload at least one image of the car';
+            return;
         }
         
         this.error = null;
@@ -167,15 +174,36 @@ export class AddCar implements OnInit {
         this.vehicleService.createVehicle(vehicleData)
             .subscribe({
                 next: (vehicle) => {
+                    const finalVincode = vehicle.vincode || vehicleData.vincode;
+                    
+                    // Send initial location ping
+                    this.iotService.recordPing({
+                        vincode: finalVincode,
+                        latitude: this.carInfo.latitude,
+                        longitude: this.carInfo.longitude
+                    }).subscribe({
+                        next: () => console.log('[AddCar] Initial ping sent successfully'),
+                        error: (err) => console.warn('[AddCar] Initial ping failed:', err)
+                    });
+
                     this.isSubmitting = false;
                     this.showConfirmation = false;
                     this.pendingVehicleData = null;
-                    alert(`${this.isEditing ? 'Vehicle updated' : 'Vehicle created'} successfully!`);
-                    this.router.navigate(['/my-cars']);
+                    
+                    this.notificationService.showToast(
+                        `${this.isEditing ? 'Vehicle updated' : 'Vehicle created'} successfully!`,
+                        'success'
+                    );
+                    
+                    setTimeout(() => {
+                        this.router.navigate(['/my-cars']);
+                    }, 1500);
                 },
                 error: (error) => {
                     this.isSubmitting = false;
+                    this.showConfirmation = false; // Close dialog on error as requested
                     this.error = error;
+                    this.notificationService.showToast(error, 'error');
                     console.error('Error creating vehicle:', error);
                 }
             });

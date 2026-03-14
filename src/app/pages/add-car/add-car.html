@@ -68,6 +68,7 @@
                     </div>
                 </div>
 
+
                 <div class="input-group">
                     <label>Description</label>
                     <textarea [(ngModel)]="carInfo.description" rows="4"
@@ -99,9 +100,14 @@
                     </div>
                 </div>
 
+                <div class="image-requirement-hint" *ngIf="selectedImages.length === 0">
+                    <span class="material-icons">info</span>
+                    At least one image is required to create a listing
+                </div>
+
                 <div class="action-footer">
                     <button class="submit-btn"
-                        [disabled]="isSubmitting || !carInfo.brand || !carInfo.model || !carInfo.matricule || carInfo.pricePerDay <= 0"
+                        [disabled]="isSubmitting || !carInfo.brand || !carInfo.model || !carInfo.matricule || carInfo.pricePerDay <= 0 || selectedImages.length === 0"
                         (click)='onSubmit()'>
                         <span *ngIf="isSubmitting" class="material-icons spinner">autorenew</span>
                         {{ isEditing ? 'Update Listing' : 'Create Listing' }}

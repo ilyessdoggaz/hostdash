@@ -25,8 +25,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
     if (user) {
       const userData = JSON.parse(user);
-      agencyId = userData.agencyId || userData.agenceId || userData.agency_id || userData.agence_id
-        || userData.user?.agencyId || userData.user?.agenceId || userData.agence?.id || userData.agency?.id || null;
+      agencyId = userData._id || userData.id || userData.agencyId || userData.agenceId || userData.agency_id || userData.agence_id
+        || userData.user?._id || userData.user?.id || userData.user?.agencyId || userData.user?.agenceId || userData.agence?.id || userData.agency?.id || null;
     }
 
     if (agencyId) {

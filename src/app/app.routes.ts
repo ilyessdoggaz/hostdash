@@ -8,6 +8,9 @@ import { AddCar } from './pages/add-car/add-car';
 import { Profile } from './pages/profile/profile';
 import { MyCars } from './pages/my-cars/my-cars';
 import { VehicleDetails } from './pages/vehicle-details/vehicle-details';
+import { VehicleHistory } from './pages/vehicle-history/vehicle-history';
+import { ArchivedCars } from './pages/archived-cars/archived-cars';
+import { PointDeRelaisPage } from './pages/point-de-relais/point-de-relais';
 import { authGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
@@ -20,6 +23,9 @@ export const routes: Routes = [
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'my-cars', component: MyCars, canActivate: [authGuard] },
   { path: 'vehicle-details/:id', component: VehicleDetails, canActivate: [authGuard] },
+  { path: 'vehicle-history/:id', component: VehicleHistory, canActivate: [authGuard] },
+  { path: 'archived-cars', component: ArchivedCars, canActivate: [authGuard] },
+  { path: 'point-de-relais', component: PointDeRelaisPage, canActivate: [authGuard] },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
 ];

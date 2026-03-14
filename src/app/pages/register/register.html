@@ -43,6 +43,14 @@
           [class.error]="errors['cinPassport']" />
         <div class="error-text" *ngIf="errors['cinPassport']">{{ errors["cinPassport"] }}</div>
 
+        <input type="text" placeholder="RNE Number *" [(ngModel)]="rneNumber" name="rneNumber" required
+          [class.error]="errors['rneNumber']" />
+        <div class="error-text" *ngIf="errors['rneNumber']">{{ errors["rneNumber"] }}</div>
+
+        <input type="text" placeholder="Patente Number *" [(ngModel)]="patenteNumber" name="patenteNumber" required
+          [class.error]="errors['patenteNumber']" />
+        <div class="error-text" *ngIf="errors['patenteNumber']">{{ errors["patenteNumber"] }}</div>
+
         <input type="password" placeholder="Password * (8+ chars, upper, lower, number)" [(ngModel)]="password"
           name="password" required minlength="8" [class.error]="errors['password']" />
         <div class="error-text" *ngIf="errors['password']">{{ errors["password"] }}</div>

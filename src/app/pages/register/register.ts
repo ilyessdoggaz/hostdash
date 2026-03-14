@@ -34,6 +34,8 @@ export class Register implements OnInit {
   legalName = "";
   legalRc = "";
   legalTaxId = "";
+  rneNumber = "";
+  patenteNumber = "";
 
   // Validation errors
   errors: { [key: string]: string } = {};
@@ -191,6 +193,16 @@ export class Register implements OnInit {
       isValid = false;
     }
 
+    if (!this.rneNumber) {
+      this.errors["rneNumber"] = "RNE Number is required";
+      isValid = false;
+    }
+
+    if (!this.patenteNumber) {
+      this.errors["patenteNumber"] = "Patente Number is required";
+      isValid = false;
+    }
+
     return isValid;
   }
 
@@ -218,6 +230,8 @@ export class Register implements OnInit {
       address: this.agencyAddress,
       zipCode: this.agencyZip,
       matriculeFiscale: this.legalTaxId,
+      rneNumber: this.rneNumber,
+      patenteNumber: this.patenteNumber,
       firstName: this.managerFirstName,
       lastName: this.managerLastName,
       cinPassport: this.cinPassport,

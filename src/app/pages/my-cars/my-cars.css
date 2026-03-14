@@ -274,6 +274,15 @@ h1 {
     color: var(--primary);
 }
 
+.action-btn.details {
+    background: #e3f2fd;
+    color: #2196f3;
+}
+
+.action-btn.details:hover {
+    background: #bbdefb;
+}
+
 .action-btn.delete {
     background-color: #fef2f2;
     color: #ef4444;
@@ -284,24 +293,6 @@ h1 {
     color: #dc2626;
 }
 
-.action-btn.details {
-    background: #e3f2fd;
-    color: #2196f3;
-}
-
-.action-btn.details:hover {
-    background: #bbdefb;
-}
-
-.action-btn.details {
-    background: #e3f2fd;
-    color: #2196f3;
-}
-
-.action-btn.details:hover {
-    background: #bbdefb;
-}
-
 .action-btn.price {
     background-color: #f0f9ff;
     color: #0ea5e9;
@@ -310,6 +301,38 @@ h1 {
 .action-btn.price:hover {
     background-color: #e0f2fe;
     color: #0284c7;
+}
+
+.action-btn.archive {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.action-btn.archive:hover {
+    background-color: #fde68a;
+    color: #b45309;
+}
+
+.action-btn.restore {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+.action-btn.restore:hover {
+    background-color: #bbf7d0;
+    color: #15803d;
+}
+
+.car-card.archived-card {
+    opacity: 0.7;
+    filter: grayscale(0.5);
+    border-style: dashed;
+    background-color: #f9fafb;
+}
+
+.car-card.archived-card:hover {
+    filter: grayscale(0);
+    opacity: 1;
 }
 
 .loading-container {
@@ -422,4 +445,45 @@ h1 {
         width: 100%;
         justify-content: center;
     }
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.archive-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    color: #4b5563;
+    border: 1px solid #e2e8f0;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.archive-nav-btn:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+.archive-nav-btn .material-icons {
+    font-size: 20px;
+    color: #64748b;
+}
+
+.action-btn.location {
+    background-color: #eff6ff;
+    color: #3b82f6;
+}
+
+.action-btn.location:hover {
+    background-color: #3b82f6;
+    color: white;
 }

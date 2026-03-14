@@ -6,6 +6,8 @@ import { finalize } from 'rxjs/operators';
 import { VehicleService } from '../../services/vehicle.service';
 import { Vehicle } from '../../models/vehicle.model';
 import { PriceUpdateDialog } from '../../components/price-update-dialog/price-update-dialog';
+import { IotService } from '../../services/iot.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
     selector: 'app-my-cars',
@@ -30,16 +32,15 @@ export class MyCars implements OnInit {
         return this.vehicles.filter(v => v.status === 'AVAILABLE').length;
     }
 
-    get maintenanceCount(): number {
-        return this.vehicles.filter(v => v.status === 'MAINTENANCE').length;
-    }
 
     private cdr = inject(ChangeDetectorRef);
     private destroyRef = inject(DestroyRef);
 
     constructor(
-        private router: Router,
-        private vehicleService: VehicleService
+        public router: Router,
+        private vehicleService: VehicleService,
+        private iotService: IotService,
+        private notificationService: NotificationService
     ) { }
 
     ngOnInit() {
@@ -76,7 +77,8 @@ export class MyCars implements OnInit {
             'AVAILABLE': 'available',
             'RENTED': 'rented',
             'MAINTENANCE': 'maintenance',
-            'INACTIVE': 'inactive'
+            'INACTIVE': 'inactive',
+            'ARCHIVED': 'inactive'
         };
         const key = (status || '').toUpperCase();
         return `status-badge ${statusMap[key] || 'inactive'}`;
@@ -87,10 +89,17 @@ export class MyCars implements OnInit {
             'AVAILABLE': 'Available',
             'RENTED': 'Rented',
             'MAINTENANCE': 'Maintenance',
-            'INACTIVE': 'Inactive'
+            'INACTIVE': 'Inactive',
+            'ARCHIVED': 'Archived'
         };
         const key = (status || '').toUpperCase();
         return statusMap[key] || status || 'Unknown';
+    }
+
+    isArchived(vehicle: Vehicle): boolean {
+        if (!vehicle || !vehicle.status) return false;
+        const s = vehicle.status.toUpperCase();
+        return s === 'INACTIVE' || s === 'ARCHIVED';
     }
 
     goBack() {
@@ -105,19 +114,83 @@ export class MyCars implements OnInit {
         this.router.navigate(['/vehicle-details', vehicleId]);
     }
 
+    async archiveCar(vehicleId: string) {
+        const confirmed = await this.notificationService.confirm(
+            'Archive Vehicle',
+            'Are you sure you want to archive this vehicle? It will no longer be visible in public searches.'
+        );
+
+        if (confirmed) {
+            const id = String(vehicleId);
+            this.vehicleService.archiveVehicle(id)
+                .subscribe({
+                    next: (updatedVehicle) => {
+                        this.handleActionSuccess(id, updatedVehicle, 'archived');
+                    },
+                    error: (err) => {
+                        console.warn('[MyCars] POST Archive failed, trying PATCH...', err);
+                        this.vehicleService.archiveVehiclePatch(id).subscribe({
+                            next: (updatedVehicle) => {
+                                this.handleActionSuccess(id, updatedVehicle, 'archived');
+                            },
+                            error: (patchErr) => {
+                                console.error('[MyCars] Archive failed:', patchErr);
+                                this.notificationService.showToast(`Archive failed: ${patchErr}`, 'error');
+                            }
+                        });
+                    }
+                });
+        }
+    }
+
+    async restoreCar(vehicleId: string) {
+        const confirmed = await this.notificationService.confirm(
+            'Restore Vehicle',
+            'Are you sure you want to restore this vehicle to your active fleet?'
+        );
+
+        if (confirmed) {
+            const id = String(vehicleId);
+            this.vehicleService.restoreVehicle(id)
+                .subscribe({
+                    next: (updatedVehicle) => {
+                        this.handleActionSuccess(id, updatedVehicle, 'restored');
+                    },
+                    error: (err) => {
+                        console.error('[MyCars] Restore failed:', err);
+                        this.notificationService.showToast(`Restore failed: ${err}`, 'error');
+                    }
+                });
+        }
+    }
+
+    private handleActionSuccess(id: string, updatedVehicle: any, action: string) {
+        const index = this.vehicles.findIndex(v => String(v.id) === id);
+        if (index !== -1) {
+            this.vehicles[index] = updatedVehicle;
+        }
+        this.notificationService.showToast(`Vehicle ${action} successfully!`, 'success');
+        this.cdr.detectChanges();
+    }
 
 
-    deleteCar(vehicleId: string) {
-        if (confirm('Are you sure you want to remove this vehicle?')) {
+
+    async deleteCar(vehicleId: string) {
+        const confirmed = await this.notificationService.confirm(
+            'Delete Vehicle',
+            'Are you sure you want to remove this vehicle? This action cannot be undone.'
+        );
+
+        if (confirmed) {
             this.vehicleService.deleteVehicle(String(vehicleId))
                 .subscribe({
                     next: () => {
                         this.vehicles = this.vehicles.filter(v => String(v.id) !== String(vehicleId));
-                        alert('Vehicle deleted successfully!');
+                        this.notificationService.showToast('Vehicle deleted successfully!', 'success');
                     },
                     error: (err) => {
                         console.error('Error deleting vehicle:', err);
-                        alert('Failed to delete vehicle: ' + (typeof err === 'string' ? err : 'Please try again.'));
+                        this.notificationService.showToast('Failed to delete vehicle.', 'error');
                     }
                 });
         }
@@ -145,12 +218,12 @@ export class MyCars implements OnInit {
                         }
                         this.priceUpdating = false;
                         this.closePriceDialog();
-                        alert('Price updated successfully!');
+                        this.notificationService.showToast('Price updated successfully!', 'success');
                     },
                     error: (err) => {
                         console.error('Error updating price:', err);
                         this.priceUpdating = false;
-                        alert('Failed to update price: ' + (typeof err === 'string' ? err : 'Please try again.'));
+                        this.notificationService.showToast('Failed to update price.', 'error');
                     }
                 });
         }
@@ -161,4 +234,14 @@ export class MyCars implements OnInit {
         this.selectedVehicle = null;
         this.priceUpdating = false;
     }
+
+    viewOnMap(vehicle: Vehicle) {
+        if (vehicle && vehicle.vincode) {
+            this.router.navigate(['/dashboard'], { queryParams: { vin: vehicle.vincode } });
+        } else {
+            this.notificationService.showToast('This vehicle does not have a VIN code for tracking.', 'warning');
+        }
+    }
+
+
 }

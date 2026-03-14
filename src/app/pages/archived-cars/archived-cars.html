@@ -1,0 +1,76 @@
+<div class="archived-cars-container">
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" (click)="goBack()">
+                <span class="material-icons">arrow_back</span>
+            </button>
+            <div>
+                <h1>Archived Vehicules</h1>
+                <p class="subtitle">Manage your inactive and archived vehicle listings</p>
+            </div>
+        </div>
+    </header>
+    <div class="stats-row" *ngIf="!loading">
+        <div class="mini-stat">
+            <span class="label">Archived Vehicles</span>
+            <span class="value">{{vehicles.length}}</span>
+        </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Fetching archived vehicles...</p>
+    </div>
+
+    <div class="error-container" *ngIf="error">
+        <span class="material-icons">error</span>
+        <p>{{error}}</p>
+        <button class="retry-btn" (click)="loadArchivedVehicles()">Retry</button>
+    </div>
+
+    <div class="cars-grid" *ngIf="!loading && vehicles.length > 0">
+        <div class="car-card archived-card" *ngFor="let vehicle of vehicles">
+            <div class="car-image">
+                <img [src]="vehicle.images[0] || 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=2070&auto=format&fit=crop'"
+                    [alt]="vehicle.model || 'Vehicle'">
+                <span [class]="getStatusClass(vehicle.status)">{{getStatusText(vehicle.status)}}</span>
+            </div>
+            <div class="car-info">
+                <div class="car-header">
+                    <h3>{{vehicle.brand || 'Car'}} {{vehicle.model || ''}}</h3>
+                    <span class="plate">{{vehicle.matricule || '-'}}</span>
+                </div>
+
+                <div class="car-details">
+                    <div class="detail-item">
+                        <span class="material-icons">calendar_today</span>
+                        {{vehicle.year}}
+                    </div>
+                </div>
+
+                <div class="car-footer">
+                    <div class="price">
+                        <span class="amount">{{vehicle.pricePerDay}} DT</span>
+                        <span class="period">/ day</span>
+                    </div>
+                    <div class="actions">
+                        <button class="action-btn restore-large" (click)="restoreCar(vehicle.id)" title="Restore to Fleet">
+                            <span class="material-icons">settings_backup_restore</span>
+                            Restore
+                        </button>
+                        <button class="action-btn delete" (click)="deleteCar(vehicle.id)" title="Delete Permanently">
+                            <span class="material-icons">delete</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && vehicles.length === 0">
+        <span class="material-icons">inventory_2</span>
+        <h2>No archived vehicles</h2>
+        <p>Vehicles you archive will appear here.</p>
+        <button class="add-btn" (click)="goBack()">Back to Dashboard</button>
+    </div>
+</div>

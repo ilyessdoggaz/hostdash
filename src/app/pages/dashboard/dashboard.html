@@ -1,53 +1,67 @@
 <div class="dashboard-layout">
   <nav class="sidebar">
-    <div class="logo">Hostdash</div>
-    <ul>
-      <li (click)="router.navigate(['/dashboard'])">Dashboard</li>
-      <li (click)="router.navigate(['/my-cars'])">My Cars</li>
-      <li>Bookings</li>
-      <li>Earnings</li>
-      <li class="logout" (click)="logout()">Logout</li>
+    <ul class="nav-list">
+      <li class="nav-item" routerLink="/my-cars" routerLinkActive="active">
+        <span class="material-icons">directions_car</span>
+        <span>My Cars</span>
+      </li>
+      <li class="nav-item" routerLink="/archived-cars" routerLinkActive="active">
+        <span class="material-icons">inventory_2</span>
+        <span>Archives</span>
+      </li>
+      <li class="nav-item" routerLink="/point-de-relais" routerLinkActive="active">
+        <span class="material-icons">place</span>
+        <span>Points de Relais</span>
+      </li>
+      <li class="nav-item">
+        <span class="material-icons">event_available</span>
+        <span>Bookings</span>
+      </li>
+      <li class="nav-item">
+        <span class="material-icons">payments</span>
+        <span>Earnings</span>
+      </li>
+      <li class="nav-item logout" (click)="logout()">
+        <span class="material-icons">logout</span>
+        <span>Logout</span>
+      </li>
     </ul>
   </nav>
 
   <main class="content">
-    <header>
-      <div class="header-main">
-        <h1>Welcome back, <span style="color: var(--primary);">{{hostProfile?.agencyName || currentUser?.firstName ||
-            'Host'}}</span></h1>
-        <button class="add-car-btn" (click)="router.navigate(['/add-car'])">
+    <div class="compact-header">
+      <div class="welcome-group">
+        <h1>Welcome back, {{currentUser?.firstName || hostProfile?.agencyName || 'Host'}}</h1>
+        <button class="add-car-btn-compact" (click)="router.navigate(['/add-car'])">
           <span class="material-icons">add</span>
           Add New Car
         </button>
       </div>
-      <button class="profile-entry" (click)="router.navigate(['/profile'])">
-        <img *ngIf="hostProfile?.agencyLogo" [src]="hostProfile.agencyLogo" alt="Profile" class="header-logo">
-        <span *ngIf="!hostProfile?.agencyLogo" class="material-icons">account_circle</span>
-      </button>
-    </header>
 
-    <div class="stats-grid">
-      <div class="stat-card">
-        <h3>Total Earnings</h3>
-        <p class="value">0.000 DT</p>
-      </div>
-      <div class="stat-card">
-        <h3>Active Rentals</h3>
-        <p class="value">0</p>
-      </div>
-      <div class="stat-card">
-        <h3>Available Cars</h3>
-        <p class="value">{{availableCount}}</p>
+      <div class="compact-stats">
+        <div class="mini-stat-card">
+          <span class="stat-label">Total Earn</span>
+          <span class="stat-value">{{totalEarn}} DT</span>
+        </div>
+        <div class="mini-stat-card">
+          <span class="stat-label">Rented</span>
+          <span class="stat-value">{{rentedCount}}</span>
+        </div>
+        <div class="mini-stat-card">
+          <span class="stat-label">Available</span>
+          <span class="stat-value">{{availableCount}}</span>
+        </div>
       </div>
     </div>
 
     <div class="dashboard-map-section">
       <div class="map-header">
-        <h3> Live Car Tracker - Tunisia</h3>
-        <div class="map-legend">
-          <span class="legend-item"><span class="dot active"></span> Active</span>
-          <span class="legend-item"><span class="dot available"></span> Available</span>
-          <span class="legend-item"><span class="dot rented"></span> Rented</span>
+        <div class="header-info">
+          <h3> Live Car Tracker - Tunisia</h3>
+          <div class="map-legend">
+            <span class="legend-item"><span class="dot available"></span> Available</span>
+            <span class="legend-item"><span class="dot rented"></span> Rented</span>
+          </div>
         </div>
       </div>
       <div id="google-map" class="google-map-container"></div>

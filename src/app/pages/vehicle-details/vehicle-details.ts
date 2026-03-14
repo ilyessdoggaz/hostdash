@@ -1,14 +1,18 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { VehicleService } from '../../services/vehicle.service';
 import { Vehicle } from '../../models/vehicle.model';
+import { AvailabilityService } from '../../services/availability.service';
+import { Unavailability, UnavailabilityReason } from '../../models/availability.model';
+import { NotificationService } from '../../services/notification.service';
 import { finalize } from 'rxjs/operators';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-vehicle-details',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, RouterLink, FormsModule],
     templateUrl: './vehicle-details.html',
     styleUrl: './vehicle-details.css'
 })
@@ -17,10 +21,23 @@ export class VehicleDetails implements OnInit {
     public loading = true;
     public error: string | null = null;
     public selectedImage: string | null = null;
+    
+    // Availability
+    public unavailabilities: Unavailability[] = [];
+    public loadingAvailability = false;
+    public availabilityError: string | null = null;
+    public blockForm = {
+        startDate: '',
+        endDate: '',
+        reason: 'MAINTENANCE' as UnavailabilityReason
+    };
+    public isSubmittingBlock = false;
 
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private vehicleService = inject(VehicleService);
+    private availabilityService = inject(AvailabilityService);
+    private notificationService = inject(NotificationService);
     private location = inject(Location);
     private cdr = inject(ChangeDetectorRef);
 
@@ -30,6 +47,7 @@ export class VehicleDetails implements OnInit {
         console.log('[VehicleDetails] Route ID:', id);
         if (id) {
             this.loadVehicleDetails(id);
+            this.loadAvailability(id);
         } else {
             this.error = 'No vehicle ID provided';
             this.loading = false;
@@ -100,5 +118,55 @@ export class VehicleDetails implements OnInit {
         };
         const key = (status || '').toUpperCase();
         return statusMap[key] || status || 'Unknown';
+    }
+
+    // Availability Methods
+
+    loadAvailability(vehicleId: string) {
+        this.loadingAvailability = true;
+        this.availabilityService.getUnavailabilities(vehicleId)
+            .pipe(finalize(() => this.loadingAvailability = false))
+            .subscribe({
+                next: (data) => this.unavailabilities = data,
+                error: (err) => this.availabilityError = err
+            });
+    }
+
+    blockDates() {
+        if (!this.vehicle || !this.blockForm.startDate || !this.blockForm.endDate) return;
+
+        this.isSubmittingBlock = true;
+        this.availabilityService.blockDates(this.vehicle.id, this.blockForm)
+            .pipe(finalize(() => this.isSubmittingBlock = false))
+            .subscribe({
+                next: (res) => {
+                    this.notificationService.showToast('Dates blocked successfully', 'success');
+                    this.unavailabilities.push(res);
+                    this.blockForm.startDate = '';
+                    this.blockForm.endDate = '';
+                    this.cdr.detectChanges();
+                },
+                error: (err) => {
+                    this.notificationService.showToast(err, 'error');
+                }
+            });
+    }
+
+    unblockDates(unavailability: Unavailability) {
+        if (!this.vehicle) return;
+
+        this.availabilityService.unblockDates(this.vehicle.id, { 
+            startDate: unavailability.startDate, 
+            endDate: unavailability.endDate 
+        }).subscribe({
+            next: () => {
+                this.notificationService.showToast('Dates unblocked successfully', 'success');
+                this.unavailabilities = this.unavailabilities.filter(u => u !== unavailability);
+                this.cdr.detectChanges();
+            },
+            error: (err) => {
+                this.notificationService.showToast(err, 'error');
+            }
+        });
     }
 }
