@@ -32,6 +32,11 @@ export class VehicleDetails implements OnInit {
         reason: 'MAINTENANCE' as UnavailabilityReason
     };
     public isSubmittingBlock = false;
+    public isUnblocking = false;
+
+    get today(): string {
+        return new Date().toISOString().split('T')[0];
+    }
 
     private route = inject(ActivatedRoute);
     private router = inject(Router);
@@ -141,9 +146,10 @@ export class VehicleDetails implements OnInit {
             .subscribe({
                 next: (res) => {
                     this.notificationService.showToast('Dates blocked successfully', 'success');
-                    this.unavailabilities.push(res);
+                    this.loadAvailability(this.vehicle!.id); // Full reload to get server-side IDs and sort order
                     this.blockForm.startDate = '';
                     this.blockForm.endDate = '';
+                    this.blockForm.reason = 'MAINTENANCE';
                     this.cdr.detectChanges();
                 },
                 error: (err) => {
@@ -153,15 +159,21 @@ export class VehicleDetails implements OnInit {
     }
 
     unblockDates(unavailability: Unavailability) {
-        if (!this.vehicle) return;
+        if (!this.vehicle || !unavailability.startDate || !unavailability.endDate) return;
 
+        this.isUnblocking = true;
         this.availabilityService.unblockDates(this.vehicle.id, { 
-            startDate: unavailability.startDate, 
-            endDate: unavailability.endDate 
-        }).subscribe({
+            startDate: unavailability.startDate,
+            endDate: unavailability.endDate
+        })
+        .pipe(finalize(() => {
+            this.isUnblocking = false;
+            this.cdr.detectChanges();
+        }))
+        .subscribe({
             next: () => {
                 this.notificationService.showToast('Dates unblocked successfully', 'success');
-                this.unavailabilities = this.unavailabilities.filter(u => u !== unavailability);
+                this.loadAvailability(this.vehicle!.id);
                 this.cdr.detectChanges();
             },
             error: (err) => {

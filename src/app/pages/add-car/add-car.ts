@@ -25,6 +25,8 @@ export class AddCar implements OnInit {
         pricePerDay: 0,
         category: 'Compact',
         fuelType: 'Petrol',
+        seatingCapacity: 5,
+        transmission: 'MANUAL' as 'MANUAL' | 'AUTOMATIC',
         description: '',
         latitude: 36.8065, // Default to Tunis Capital
         longitude: 10.1815
@@ -45,6 +47,7 @@ export class AddCar implements OnInit {
 
     fuelTypes = ['Petrol', 'Diesel', 'Electric', 'Hybrid', 'LPG'];
     categories = ['Compact', 'Sedan', 'SUV', 'Van', 'Luxury', 'Sports'];
+    transmissions: ('MANUAL' | 'AUTOMATIC')[] = ['MANUAL', 'AUTOMATIC'];
 
     constructor(
         private router: Router,
@@ -70,6 +73,8 @@ export class AddCar implements OnInit {
                 pricePerDay: vehicle.pricePerDay,
                 category: vehicle.category,
                 fuelType: vehicle.fuelType,
+                seatingCapacity: vehicle.seatingCapacity ?? 5,
+                transmission: vehicle.transmission ?? 'MANUAL',
                 description: '',
                 latitude: 36.8065,
                 longitude: 10.1815
@@ -162,6 +167,8 @@ export class AddCar implements OnInit {
             pricePerDay: this.carInfo.pricePerDay,
             category: this.carInfo.category,
             fuelType: this.carInfo.fuelType,
+            seatingCapacity: this.carInfo.seatingCapacity,
+            transmission: this.carInfo.transmission,
             images: this.selectedImages.length > 0 ? this.selectedImages : []
         };
         

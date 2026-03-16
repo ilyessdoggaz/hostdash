@@ -69,6 +69,21 @@
                 </div>
 
 
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Seating Capacity</label>
+                        <input type="number" [(ngModel)]="carInfo.seatingCapacity" min="1" max="12" placeholder="e.g. 5">
+                    </div>
+                    <div class="input-group">
+                        <label>Transmission</label>
+                        <select [(ngModel)]="carInfo.transmission">
+                            <option *ngFor="let t of transmissions" [value]="t">
+                                {{ t === 'MANUAL' ? 'Manual' : 'Automatic' }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="input-group">
                     <label>Description</label>
                     <textarea [(ngModel)]="carInfo.description" rows="4"

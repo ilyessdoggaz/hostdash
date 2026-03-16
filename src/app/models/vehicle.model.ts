@@ -18,6 +18,8 @@ export interface Vehicle {
   status: 'AVAILABLE' | 'RENTED' | 'MAINTENANCE' | 'INACTIVE' | 'ARCHIVED';
   images: string[];
   fuelType: string;
+  seatingCapacity?: number;
+  transmission?: 'MANUAL' | 'AUTOMATIC';
   createdAt: string;
   updatedAt: string;
 }
@@ -31,6 +33,8 @@ export interface CreateVehicleRequest {
   pricePerDay: number;
   category: string;
   fuelType: string;
+  seatingCapacity?: number;
+  transmission?: 'MANUAL' | 'AUTOMATIC';
   images: string[];
 }
 

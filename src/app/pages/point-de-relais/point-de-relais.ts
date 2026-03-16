@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RelaisService } from '../../services/relais.service';
 import { PointDeRelais } from '../../models/relais.model';
@@ -33,10 +33,15 @@ export class PointDeRelaisPage implements OnInit, AfterViewInit {
 
     private relaisService = inject(RelaisService);
     private notificationService = inject(NotificationService);
+    private location = inject(Location);
     private cdr = inject(ChangeDetectorRef);
 
     ngOnInit() {
         this.loadPoints();
+    }
+
+    goBack() {
+        this.location.back();
     }
 
     ngAfterViewInit() {

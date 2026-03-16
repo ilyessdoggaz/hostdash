@@ -1,14 +1,15 @@
 export type UnavailabilityReason = 'BOOKED' | 'MAINTENANCE';
 
 export interface Unavailability {
-    id?: string;
+    id: string;         // Always returned by the API
     vehicleId: string;
-    startDate: string; // ISO date YYYY-MM-DD
-    endDate: string;   // ISO date YYYY-MM-DD
+    startDate: string;  // ISO date YYYY-MM-DD
+    endDate: string;    // ISO date YYYY-MM-DD
     reason: UnavailabilityReason;
 }
 
 export interface UnavailabilityResponse {
+    id: string;
     vehicleId: string;
     startDate: string;
     endDate: string;

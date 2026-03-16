@@ -98,11 +98,11 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Start Date</label>
-                                <input type="date" [(ngModel)]="blockForm.startDate" name="startDate">
+                                <input type="date" [(ngModel)]="blockForm.startDate" name="startDate" [min]="today">
                             </div>
                             <div class="form-group">
                                 <label>End Date</label>
-                                <input type="date" [(ngModel)]="blockForm.endDate" name="endDate">
+                                <input type="date" [(ngModel)]="blockForm.endDate" name="endDate" [min]="blockForm.startDate || today">
                             </div>
                         </div>
                         <div class="form-row">
@@ -115,6 +115,7 @@
                             </div>
                             <button class="block-btn" (click)="blockDates()" [disabled]="isSubmittingBlock || !blockForm.startDate || !blockForm.endDate">
                                 <span class="material-icons" *ngIf="!isSubmittingBlock">block</span>
+                                <span class="spinner-small" *ngIf="isSubmittingBlock"></span>
                                 {{ isSubmittingBlock ? 'Blocking...' : 'Block' }}
                             </button>
                         </div>
@@ -124,11 +125,12 @@
                         <h3>Upcoming Restrictions</h3>
                         <div class="unavailability-item" *ngFor="let item of unavailabilities">
                             <div class="item-info">
-                                <span class="range">{{item.startDate}} to {{item.endDate}}</span>
+                                <span class="range">{{item.startDate | date:'mediumDate'}} - {{item.endDate | date:'mediumDate'}}</span>
                                 <span class="reason-badge" [class]="item.reason.toLowerCase()">{{item.reason}}</span>
                             </div>
-                            <button class="unblock-btn" (click)="unblockDates(item)" title="Unblock">
-                                <span class="material-icons">delete</span>
+                            <button class="unblock-btn" (click)="unblockDates(item)" [disabled]="isUnblocking" title="Unblock">
+                                <span class="material-icons" *ngIf="!isUnblocking">delete</span>
+                                <span class="spinner-small" *ngIf="isUnblocking"></span>
                             </button>
                         </div>
                     </div>
@@ -137,7 +139,12 @@
                         <div class="spinner-small"></div>
                     </div>
 
-                    <div *ngIf="unavailabilities.length === 0 && !loadingAvailability" class="empty-state">
+                    <div *ngIf="availabilityError" class="error-sm">
+                        <span class="material-icons">error_outline</span>
+                        {{availabilityError}}
+                    </div>
+
+                    <div *ngIf="unavailabilities.length === 0 && !loadingAvailability && !availabilityError" class="empty-state">
                         <p>No upcoming restrictions found.</p>
                     </div>
                 </div>
