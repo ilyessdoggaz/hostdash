@@ -113,6 +113,7 @@ h1 {
     overflow: hidden;
     border: 1px solid #e2e8f0;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
 }
 
 .car-card:hover {
@@ -162,7 +163,7 @@ h1 {
 }
 
 .status-badge.available {
-    background: rgba(99, 102, 241, 0.9);
+    background: rgba(34, 197, 94, 0.9);
     color: white;
 }
 
@@ -464,7 +465,7 @@ h1 {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .archive-nav-btn:hover {

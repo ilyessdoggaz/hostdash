@@ -5,7 +5,6 @@
         </button>
         <div class="header-content">
             <h1>Points de Relais</h1>
-            <p class="subtitle">Manage authorized drop-off and pick-up locations for your agency.</p>
         </div>
         <button class="add-btn" (click)="openMapPicker()">
             <span class="material-icons">add_location_alt</span>
@@ -25,7 +24,8 @@
             </div>
             <div class="card-body">
                 <h3>{{ point.name }}</h3>
-                <p class="coords">Lat: {{ point.latitude | number:'1.4-4' }}, Lng: {{ point.longitude | number:'1.4-4' }}</p>
+                <p class="coords">Lat: {{ point.latitude | number:'1.4-4' }}, Lng: {{ point.longitude | number:'1.4-4'
+                    }}</p>
                 <p class="date">Added on {{ point.createdAt | date:'shortDate' }}</p>
             </div>
             <button class="delete-btn" (click)="deletePoint(point.id)" title="Delete Point">
@@ -48,16 +48,17 @@
                     <span class="material-icons">close</span>
                 </button>
             </div>
-            
+
             <div class="modal-body">
                 <p class="instruction">Click anywhere on the map to set the location.</p>
-                
+
                 <div id="picker-map" class="picker-map"></div>
 
                 <div class="form-section">
                     <div class="form-group">
                         <label>Location Name</label>
-                        <input type="text" [(ngModel)]="newPoint.name" placeholder="e.g. Airport Parking, City Center Store..." name="pointName">
+                        <input type="text" [(ngModel)]="newPoint.name"
+                            placeholder="e.g. Airport Parking, City Center Store..." name="pointName">
                     </div>
                     <div class="coords-display" *ngIf="newPoint.latitude">
                         <span class="material-icons">gps_fixed</span>
@@ -68,7 +69,8 @@
 
             <div class="modal-footer">
                 <button class="cancel-btn" (click)="closeMapPicker()">Cancel</button>
-                <button class="save-btn" (click)="savePoint()" [disabled]="isSubmitting || !newPoint.name || !newPoint.latitude">
+                <button class="save-btn" (click)="savePoint()"
+                    [disabled]="isSubmitting || !newPoint.name || !newPoint.latitude">
                     {{ isSubmitting ? 'Saving...' : 'Save Location' }}
                 </button>
             </div>

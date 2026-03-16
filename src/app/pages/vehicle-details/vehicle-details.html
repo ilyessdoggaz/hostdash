@@ -23,9 +23,8 @@
     <div class="content" *ngIf="!loading && !error && vehicle">
         <div class="main-grid">
             <div class="image-section">
-                <div class="main-image">
-                    <img [src]="selectedImage || 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=2070&auto=format&fit=crop'"
-                        [alt]="vehicle.model">
+                <div class="main-image" (click)="toggleFullImage(true)">
+                    <img [src]="selectedImage" [alt]="vehicle.model">
                     <span [class]="getStatusClass(vehicle.status)">{{getStatusText(vehicle.status)}}</span>
                 </div>
                 <div class="image-gallery" *ngIf="vehicle.images && vehicle.images.length > 1">
@@ -82,7 +81,7 @@
                 </div>
 
                 <div class="card tracking-card" *ngIf="vehicle.vincode">
-                    <h2>IoT Tracking</h2>
+                    <h2>Tracking History</h2>
                     <p class="description">Live location and movement history from the vehicle's onboard GPS.</p>
                     <button class="track-btn" [routerLink]="['/vehicle-history', vehicle.id]">
                         <span class="material-icons">query_stats</span>
@@ -93,7 +92,7 @@
                 <div class="card availability-card">
                     <h2>Availability Management</h2>
                     <p class="description">Block dates for maintenance or view upcoming bookings.</p>
-                    
+
                     <div class="availability-form">
                         <div class="form-row">
                             <div class="form-group">
@@ -102,7 +101,8 @@
                             </div>
                             <div class="form-group">
                                 <label>End Date</label>
-                                <input type="date" [(ngModel)]="blockForm.endDate" name="endDate" [min]="blockForm.startDate || today">
+                                <input type="date" [(ngModel)]="blockForm.endDate" name="endDate"
+                                    [min]="blockForm.startDate || today">
                             </div>
                         </div>
                         <div class="form-row">
@@ -113,7 +113,8 @@
                                     <option value="BOOKED">Booked</option>
                                 </select>
                             </div>
-                            <button class="block-btn" (click)="blockDates()" [disabled]="isSubmittingBlock || !blockForm.startDate || !blockForm.endDate">
+                            <button class="block-btn" (click)="blockDates()"
+                                [disabled]="isSubmittingBlock || !blockForm.startDate || !blockForm.endDate">
                                 <span class="material-icons" *ngIf="!isSubmittingBlock">block</span>
                                 <span class="spinner-small" *ngIf="isSubmittingBlock"></span>
                                 {{ isSubmittingBlock ? 'Blocking...' : 'Block' }}
@@ -125,10 +126,12 @@
                         <h3>Upcoming Restrictions</h3>
                         <div class="unavailability-item" *ngFor="let item of unavailabilities">
                             <div class="item-info">
-                                <span class="range">{{item.startDate | date:'mediumDate'}} - {{item.endDate | date:'mediumDate'}}</span>
+                                <span class="range">{{item.startDate | date:'mediumDate'}} - {{item.endDate |
+                                    date:'mediumDate'}}</span>
                                 <span class="reason-badge" [class]="item.reason.toLowerCase()">{{item.reason}}</span>
                             </div>
-                            <button class="unblock-btn" (click)="unblockDates(item)" [disabled]="isUnblocking" title="Unblock">
+                            <button class="unblock-btn" (click)="unblockDates(item)" [disabled]="isUnblocking"
+                                title="Unblock">
                                 <span class="material-icons" *ngIf="!isUnblocking">delete</span>
                                 <span class="spinner-small" *ngIf="isUnblocking"></span>
                             </button>
@@ -144,7 +147,8 @@
                         {{availabilityError}}
                     </div>
 
-                    <div *ngIf="unavailabilities.length === 0 && !loadingAvailability && !availabilityError" class="empty-state">
+                    <div *ngIf="unavailabilities.length === 0 && !loadingAvailability && !availabilityError"
+                        class="empty-state">
                         <p>No upcoming restrictions found.</p>
                     </div>
                 </div>
@@ -159,4 +163,13 @@
     <span class="material-icons">info</span>
     <p>No vehicle details available.</p>
     <button class="retry-btn" (click)="goBack()">Go Back</button>
+</div>
+<!-- Full Image Overlay -->
+<div class="full-image-overlay" *ngIf="showFullImage" (click)="toggleFullImage(false)">
+    <div class="overlay-content" (click)="$event.stopPropagation()">
+        <button class="close-overlay" (click)="toggleFullImage(false)">
+            <span class="material-icons">close</span>
+        </button>
+        <img [src]="selectedImage" [alt]="vehicle?.model">
+    </div>
 </div>

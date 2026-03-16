@@ -21,6 +21,7 @@ export class VehicleDetails implements OnInit {
     public loading = true;
     public error: string | null = null;
     public selectedImage: string | null = null;
+    public showFullImage = false;
     
     // Availability
     public unavailabilities: Unavailability[] = [];
@@ -96,6 +97,11 @@ export class VehicleDetails implements OnInit {
 
     selectImage(img: string) {
         this.selectedImage = img;
+        this.cdr.detectChanges();
+    }
+
+    toggleFullImage(show: boolean) {
+        this.showFullImage = show;
         this.cdr.detectChanges();
     }
 

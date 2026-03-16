@@ -14,12 +14,12 @@
             <!-- Car Details Column -->
             <div class="detail-section">
                 <h3>Vehicle Details</h3>
-                
+
                 <div class="error-message" *ngIf="error">
                     <span class="material-icons">error</span>
                     {{error}}
                 </div>
-                
+
                 <div class="input-row">
                     <div class="input-group">
                         <label>Brand *</label>
@@ -72,7 +72,8 @@
                 <div class="input-row">
                     <div class="input-group">
                         <label>Seating Capacity</label>
-                        <input type="number" [(ngModel)]="carInfo.seatingCapacity" min="1" max="12" placeholder="e.g. 5">
+                        <input type="number" [(ngModel)]="carInfo.seatingCapacity" min="1" max="12"
+                            placeholder="e.g. 5">
                     </div>
                     <div class="input-group">
                         <label>Transmission</label>
@@ -93,7 +94,7 @@
 
             <!-- Image Upload Column -->
             <div class="upload-section">
-                <h3>Vehicle Photos (Max 5)</h3>
+                <h3>Vehicle Photos</h3>
                 <div class="drop-zone" [class.active]="isDragging" (dragover)="onDragOver($event)"
                     (dragleave)="onDragLeave($event)" (drop)="onDrop($event)" (click)="fileInput.click()">
                     <span class="material-icons">cloud_upload</span>
@@ -115,10 +116,6 @@
                     </div>
                 </div>
 
-                <div class="image-requirement-hint" *ngIf="selectedImages.length === 0">
-                    <span class="material-icons">info</span>
-                    At least one image is required to create a listing
-                </div>
 
                 <div class="action-footer">
                     <button class="submit-btn"
@@ -133,11 +130,6 @@
     </div>
 </div>
 
-<app-car-confirmation-dialog
-    [isOpen]="showConfirmation"
-    [vehicleData]="pendingVehicleData"
-    [images]="selectedImages"
-    [submitting]="isSubmitting"
-    (closeDialog)="closeConfirmation()"
-    (confirmCreation)="confirmCreation()">
+<app-car-confirmation-dialog [isOpen]="showConfirmation" [vehicleData]="pendingVehicleData" [images]="selectedImages"
+    [submitting]="isSubmitting" (closeDialog)="closeConfirmation()" (confirmCreation)="confirmCreation()">
 </app-car-confirmation-dialog>
