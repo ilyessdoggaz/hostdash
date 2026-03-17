@@ -169,8 +169,8 @@ export class VehicleDetails implements OnInit {
 
         this.isUnblocking = true;
         this.availabilityService.unblockDates(this.vehicle.id, { 
-            startDate: unavailability.startDate,
-            endDate: unavailability.endDate
+            startDate: unavailability.startDate ? String(unavailability.startDate).split('T')[0] : '',
+            endDate: unavailability.endDate ? String(unavailability.endDate).split('T')[0] : ''
         })
         .pipe(finalize(() => {
             this.isUnblocking = false;
