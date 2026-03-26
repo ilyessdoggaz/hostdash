@@ -3,5 +3,7 @@ export interface PointDeRelais {
     name: string;
     latitude: number;
     longitude: number;
-    createdAt: string;
+    agencyId: string;
+    active: boolean;
+    address: string;
 }

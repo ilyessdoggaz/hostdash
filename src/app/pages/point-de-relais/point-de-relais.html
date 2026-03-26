@@ -18,19 +18,28 @@
     </div>
 
     <div class="points-grid" *ngIf="!loading && points.length > 0">
-        <div class="point-card" *ngFor="let point of points">
+        <div class="point-card" *ngFor="let point of points" [class.inactive]="!point.active">
             <div class="card-icon">
-                <span class="material-icons">place</span>
+                <span class="material-icons">{{ point.active ? 'place' : 'location_off' }}</span>
             </div>
             <div class="card-body">
                 <h3>{{ point.name }}</h3>
-                <p class="coords">Lat: {{ point.latitude | number:'1.4-4' }}, Lng: {{ point.longitude | number:'1.4-4'
-                    }}</p>
-                <p class="date">Added on {{ point.createdAt | date:'shortDate' }}</p>
+                <p class="address">{{ point.address }}</p>
+                <div class="card-meta">
+                    <p class="coords">Lat: {{ point.latitude | number:'1.4-4' }}, Lng: {{ point.longitude | number:'1.4-4' }}</p>
+                    <span class="status-badge" [class.active]="point.active">{{ point.active ? 'Active' : 'Inactive' }}</span>
+                </div>
             </div>
-            <button class="delete-btn" (click)="deletePoint(point.id)" title="Delete Point">
-                <span class="material-icons">delete_outline</span>
-            </button>
+            <div class="card-actions">
+                <button class="action-btn edit" (click)="editPoint(point)" title="Edit Point">
+                    <span class="material-icons">edit</span>
+                </button>
+                <button *ngIf="point.active" class="action-btn deactivate" 
+                    (click)="deactivatePoint(point.id || $any(point)._id)" title="Deactivate Point"
+                    [disabled]="isSubmitting">
+                    <span class="material-icons">block</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -43,7 +52,7 @@
     <div class="map-overlay" *ngIf="showMap">
         <div class="modal-card">
             <div class="modal-header">
-                <h2>Add Point de Relais</h2>
+                <h2>{{ isEditing ? 'Edit' : 'Add' }} Point de Relais</h2>
                 <button class="close-btn" (click)="closeMapPicker()">
                     <span class="material-icons">close</span>
                 </button>
@@ -60,6 +69,12 @@
                         <input type="text" [(ngModel)]="newPoint.name"
                             placeholder="e.g. Airport Parking, City Center Store..." name="pointName">
                     </div>
+                    <div class="form-group mt-3">
+                        <label>Address</label>
+                        <textarea name="pointAddress" rows="2" 
+                            placeholder="Address will be auto-filled or you can enter it manually..."
+                            [(ngModel)]="newPoint.address"></textarea>
+                    </div>
                     <div class="coords-display" *ngIf="newPoint.latitude">
                         <span class="material-icons">gps_fixed</span>
                         Selected: {{ newPoint.latitude | number:'1.4-4' }}, {{ newPoint.longitude | number:'1.4-4' }}
@@ -71,7 +86,7 @@
                 <button class="cancel-btn" (click)="closeMapPicker()">Cancel</button>
                 <button class="save-btn" (click)="savePoint()"
                     [disabled]="isSubmitting || !newPoint.name || !newPoint.latitude">
-                    {{ isSubmitting ? 'Saving...' : 'Save Location' }}
+                    {{ isSubmitting ? 'Saving...' : (isEditing ? 'Update Location' : 'Save Location') }}
                 </button>
             </div>
         </div>

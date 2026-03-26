@@ -11,6 +11,7 @@ import { VehicleDetails } from './pages/vehicle-details/vehicle-details';
 import { VehicleHistory } from './pages/vehicle-history/vehicle-history';
 import { ArchivedCars } from './pages/archived-cars/archived-cars';
 import { PointDeRelaisPage } from './pages/point-de-relais/point-de-relais';
+import { Bookings } from './pages/bookings/bookings';
 import { authGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
@@ -26,6 +27,7 @@ export const routes: Routes = [
   { path: 'vehicle-history/:id', component: VehicleHistory, canActivate: [authGuard] },
   { path: 'archived-cars', component: ArchivedCars, canActivate: [authGuard] },
   { path: 'point-de-relais', component: PointDeRelaisPage, canActivate: [authGuard] },
+  { path: 'bookings', component: Bookings, canActivate: [authGuard] },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
 ];
