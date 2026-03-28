@@ -64,18 +64,22 @@ export class Auth {
 
   register(data: any): Observable<AuthResponse> {
     const payload = data.city ? data : {
-      agencyName: data.agency?.name || data.agencyName,
-      city: data.agency?.city || data.agencyCity,
-      address: data.agency?.address || data.agencyAddress,
-      zipCode: data.agency?.zip || data.agencyZip,
-      matriculeFiscale: data.legal?.taxId || data.legalTaxId,
-      firstName: data.manager?.firstName || data.managerFirstName,
-      lastName: data.manager?.lastName || data.managerLastName,
-      cinPassport: data.legal?.cin || data.cinPassport || "",
-      phone: data.manager?.phone || data.managerPhone,
-      email: data.manager?.email || data.email,
+      agencyName: data.agencyName,
+      city: data.agencyCity,
+      address: data.agencyAddress,
+      zipCode: data.agencyZip,
+      latitude: data.agencyLatitude,
+      longitude: data.agencyLongitude,
+      matriculeFiscale: data.legalTaxId,
+      rneNumber: data.rneNumber,
+      patenteNumber: data.patenteNumber,
+      firstName: data.managerFirstName,
+      lastName: data.managerLastName,
+      cinPassport: data.cinPassport,
+      phone: data.managerPhone,
+      email: data.email,
       password: data.password,
-      confirmPassword: data.confirmPassword || data.password
+      confirmPassword: data.confirmPassword
     };
 
     return this.http

@@ -44,7 +44,9 @@ export class MyCars implements OnInit {
     ) { }
 
     ngOnInit() {
-        this.loadVehicles();
+        setTimeout(() => {
+            this.loadVehicles();
+        });
     }
 
     loadVehicles() {
@@ -76,9 +78,7 @@ export class MyCars implements OnInit {
         const statusMap: { [key: string]: string } = {
             'AVAILABLE': 'available',
             'RENTED': 'rented',
-            'MAINTENANCE': 'maintenance',
-            'INACTIVE': 'inactive',
-            'ARCHIVED': 'inactive'
+            'MAINTENANCE': 'maintenance'
         };
         const key = (status || '').toUpperCase();
         return `status-badge ${statusMap[key] || 'inactive'}`;
@@ -88,18 +88,14 @@ export class MyCars implements OnInit {
         const statusMap: { [key: string]: string } = {
             'AVAILABLE': 'Available',
             'RENTED': 'Rented',
-            'MAINTENANCE': 'Maintenance',
-            'INACTIVE': 'Inactive',
-            'ARCHIVED': 'Archived'
+            'MAINTENANCE': 'Maintenance'
         };
         const key = (status || '').toUpperCase();
         return statusMap[key] || status || 'Unknown';
     }
 
     isArchived(vehicle: Vehicle): boolean {
-        if (!vehicle || !vehicle.status) return false;
-        const s = vehicle.status.toUpperCase();
-        return s === 'INACTIVE' || s === 'ARCHIVED';
+        return vehicle && vehicle.isArchived === true;
     }
 
     goBack() {
@@ -124,14 +120,18 @@ export class MyCars implements OnInit {
             const id = String(vehicleId);
             this.vehicleService.archiveVehicle(id)
                 .subscribe({
-                    next: (updatedVehicle) => {
-                        this.handleActionSuccess(id, updatedVehicle, 'archived');
+                    next: () => {
+                        this.vehicles = this.vehicles.filter(v => String(v.id) !== id);
+                        this.notificationService.showToast('Vehicle archived successfully!', 'success');
+                        this.cdr.detectChanges();
                     },
                     error: (err) => {
-                        console.warn('[MyCars] POST Archive failed, trying PATCH...', err);
+                        console.warn('[MyCars] PATCH Archive failed, trying PATCH again (fallback)...', err);
                         this.vehicleService.archiveVehiclePatch(id).subscribe({
-                            next: (updatedVehicle) => {
-                                this.handleActionSuccess(id, updatedVehicle, 'archived');
+                            next: () => {
+                                this.vehicles = this.vehicles.filter(v => String(v.id) !== id);
+                                this.notificationService.showToast('Vehicle archived successfully!', 'success');
+                                this.cdr.detectChanges();
                             },
                             error: (patchErr) => {
                                 console.error('[MyCars] Archive failed:', patchErr);
@@ -154,7 +154,10 @@ export class MyCars implements OnInit {
             this.vehicleService.restoreVehicle(id)
                 .subscribe({
                     next: (updatedVehicle) => {
-                        this.handleActionSuccess(id, updatedVehicle, 'restored');
+                        // After restoration, it should be available in active fleet.
+                        // But since we are already in My Cars page, we might wanting to refresh or just skip.
+                        this.notificationService.showToast('Vehicle restored successfully!', 'success');
+                        this.loadVehicles(); // Refresh to get the restored car in the list
                     },
                     error: (err) => {
                         console.error('[MyCars] Restore failed:', err);

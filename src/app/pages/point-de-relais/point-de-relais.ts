@@ -180,16 +180,11 @@ export class PointDeRelaisPage implements OnInit, AfterViewInit {
                     'success'
                 );
                 if (isEditMode && currentEditingId) {
-                    // Use the locally-known editingId to find the point — more reliable
-                    // than using returnedPoint.id which may differ in id/_id format
-                    const index = this.points.findIndex(
-                        p => p.id === currentEditingId || (p as any)._id === currentEditingId
-                    );
+                    const index = this.points.findIndex(p => p.id === currentEditingId);
                     if (index !== -1) {
-                        // Merge the API response with the form data to ensure UI reflects latest state
                         this.points = [
                             ...this.points.slice(0, index),
-                            { ...this.points[index], ...returnedPoint, id: currentEditingId, ...this.newPoint },
+                            returnedPoint,
                             ...this.points.slice(index + 1)
                         ];
                     } else {
@@ -231,11 +226,7 @@ export class PointDeRelaisPage implements OnInit, AfterViewInit {
                 if (index !== -1) {
                     // Create a new array reference to ensure change detection
                     const newPoints = [...this.points];
-                    newPoints[index] = { 
-                        ...this.points[index], 
-                        ...(updatedPoint || {}), 
-                        active: false 
-                    };
+                    newPoints[index] = updatedPoint;
                     this.points = newPoints;
                     console.log('[PointDeRelaisPage] Updated local state for point:', id);
                 } else {

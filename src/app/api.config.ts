@@ -5,6 +5,6 @@ export const VEHICLES_MY_CARS_PATH = 'my-cars';
 export const VEHICLES_ARCHIVED_PATH = 'my-cars/archived';
 
 /** IoT tracking paths */
-export const IOT_PINGS_PATH = 'iot/pings';
-export const IOT_LAST_PATH = 'last';
+export const IOT_PINGS_PATH = 'iot/vehicles';
+export const IOT_LAST_PATH = 'latest';
 export const IOT_HISTORY_PATH = 'history';

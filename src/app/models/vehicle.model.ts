@@ -1,6 +1,6 @@
 export interface Agency {
   id: string;
-  name: string;
+  agencyName: string;
   logo: string;
 }
 
@@ -14,14 +14,19 @@ export interface Vehicle {
   year: number;
   pricePerDay: number;
   category: string;
-  isArchived?: boolean;
-  status: 'AVAILABLE' | 'RENTED' | 'MAINTENANCE' | 'INACTIVE' | 'ARCHIVED';
+  isArchived: boolean;
+  status: 'AVAILABLE' | 'RENTED' | 'MAINTENANCE';
   images: string[];
   fuelType: string;
   seatingCapacity?: number;
   transmission?: 'MANUAL' | 'AUTOMATIC';
   createdAt: string;
   updatedAt: string;
+  latitude?: number;
+  longitude?: number;
+  lastPing?: string;
+  relayPointId?: string;
+  deviceCode?: string;
 }
 
 export interface CreateVehicleRequest {
@@ -33,9 +38,10 @@ export interface CreateVehicleRequest {
   pricePerDay: number;
   category: string;
   fuelType: string;
-  seatingCapacity?: number;
-  transmission?: 'MANUAL' | 'AUTOMATIC';
+  seatingCapacity: number;
+  transmission: 'MANUAL' | 'AUTOMATIC';
   images: string[];
+  deviceCode?: string;
 }
 
 export interface UpdatePriceRequest {

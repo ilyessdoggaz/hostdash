@@ -115,10 +115,10 @@ export class Dashboard implements AfterViewInit, OnInit {
     }
     const apiKey = "AIzaSyAYulgRVgsSypvjULhmPRCvtNozLJXfPfM";
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMapDashboard`;
     script.async = true;
     script.defer = true;
-    (window as any).initMap = () => this.initMap();
+    (window as any).initMapDashboard = () => this.initMap();
     document.head.appendChild(script);
   }
 

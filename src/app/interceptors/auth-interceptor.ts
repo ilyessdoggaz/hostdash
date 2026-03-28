@@ -55,12 +55,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       Authorization: `Bearer ${token}`
     };
 
-    if (agencyId) {
-      headers['X-Agency-Id'] = agencyId;
-      console.log('[AuthInterceptor] Sending X-Agency-Id:', agencyId);
-    } else {
-      console.warn('[AuthInterceptor] No agencyId found — sending only Bearer token');
-    }
+    // if (agencyId) {
+    //   headers['X-Agency-Id'] = agencyId;
+    //   console.log('[AuthInterceptor] Sending X-Agency-Id:', agencyId);
+    // } else {
+    //   console.warn('[AuthInterceptor] No agencyId found — sending only Bearer token');
+    // }
 
     req = req.clone({ setHeaders: headers });
   }

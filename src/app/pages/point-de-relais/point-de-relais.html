@@ -35,7 +35,7 @@
                     <span class="material-icons">edit</span>
                 </button>
                 <button *ngIf="point.active" class="action-btn deactivate" 
-                    (click)="deactivatePoint(point.id || $any(point)._id)" title="Deactivate Point"
+                    (click)="deactivatePoint(point.id)" title="Deactivate Point"
                     [disabled]="isSubmitting">
                     <span class="material-icons">block</span>
                 </button>

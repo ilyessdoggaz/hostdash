@@ -2,22 +2,95 @@
   <div class="auth-card" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
     <h2>Register</h2>
     <form (ngSubmit)="register()" #registerForm="ngForm">
+      
+      <!-- Map picker overlay -->
+      <div class="map-overlay" *ngIf="showMap">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h2>Pick Location on Map</h2>
+            <button class="close-btn" (click)="closeMapPicker()">
+              <span class="material-icons">close</span>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <p class="instruction">Click anywhere on the map to set the location.</p>
+
+            <div id="register-map" class="picker-map"></div>
+
+            <div class="form-section">
+              <div class="form-group">
+                <label>Location Name</label>
+                <input type="text" [(ngModel)]="agencyAddress"
+                    placeholder="Address will be auto-filled or you can enter it manually..."
+                    name="pointAddress">
+              </div>
+              <div class="coords-display" *ngIf="agencyLatitude && agencyLongitude">
+                <span class="material-icons">gps_fixed</span>
+                Selected: {{ agencyLatitude | number:'1.4-4' }}, {{ agencyLongitude | number:'1.4-4' }}
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button class="cancel-btn" (click)="closeMapPicker()">Cancel</button>
+            <button class="save-btn" (click)="closeMapPicker()"
+                [disabled]="!agencyLatitude || !agencyLongitude">
+              Use Selected Location
+            </button>
+          </div>
+        </div>
+      </div>
       <div class="form-section">
         <h3>Agency Information</h3>
+        <div class="logo-upload">
+          <label class="logo-label">Agency Logo</label>
+          <div class="logo-upload-area" (click)="fileInput.click()">
+            <div *ngIf="!logoPreview" class="upload-placeholder">
+              <span class="material-icons">add_a_photo</span>
+              <p>Click to upload logo</p>
+              <small>Recommended: PNG or JPG, max 2MB</small>
+            </div>
+            <div *ngIf="logoPreview" class="logo-preview-container">
+              <img [src]="logoPreview" alt="Logo Preview" class="logo-preview" />
+              <button type="button" class="remove-logo-btn" (click)="removeLogo($event)" title="Remove logo">
+                <span class="material-icons">close</span>
+              </button>
+            </div>
+            <input #fileInput type="file" accept="image/*" (change)="onLogoSelected($event)" style="display: none;">
+          </div>
+          <div *ngIf="errors['logo']" class="error-text">{{ errors["logo"] }}</div>
+        </div>
         <input type="text" placeholder="Agency Name *" [(ngModel)]="agencyName" name="agencyName" required
           [class.error]="errors['agencyName']" />
         <div class="error-text" *ngIf="errors['agencyName']">{{ errors["agencyName"] }}</div>
-        <input type="text" placeholder="City * (e.g., Tunis, Sfax, Sousse)" [(ngModel)]="agencyCity" name="agencyCity"
-          required list="cities" [class.error]="errors['agencyCity']" />
-        <datalist id="cities">
-          <option *ngFor="let city of tunisiaCities" [value]="city">{{ city }}</option>
-        </datalist>
+        <div class="city-select-wrapper">
+          <select [(ngModel)]="agencyCity" name="agencyCity" required [class.error]="errors['agencyCity']">
+            <option value="" disabled selected>City * (e.g., Tunis, Sfax, Sousse)</option>
+            <option *ngFor="let city of tunisiaCities" [value]="city">{{ city }}</option>
+          </select>
+          <span class="select-arrow">
+            <span class="material-icons">arrow_drop_down</span>
+          </span>
+        </div>
         <div class="error-text" *ngIf="errors['agencyCity']">{{ errors["agencyCity"] }}</div>
         <input type="text" placeholder="Full Address *" [(ngModel)]="agencyAddress" name="agencyAddress" required
-          [class.error]="errors['agencyAddress']" />
+          [class.error]="errors['agencyAddress']" style="margin-bottom: 0.75rem;" readonly />
         <div class="error-text" *ngIf="errors['agencyAddress']">{{ errors["agencyAddress"] }}</div>
+        
+        <div class="location-section">
+          <button type="button" class="map-btn" (click)="openMapPicker()">
+            <span class="material-icons">map</span>
+            Pick Location on Map
+          </button>
+          <div class="coords-display" *ngIf="agencyLatitude && agencyLongitude">
+            <span class="material-icons">gps_fixed</span>
+            Selected: {{ agencyLatitude | number:'1.4-4' }}, {{ agencyLongitude | number:'1.4-4' }}
+          </div>
+        </div>
+        
         <input type="text" placeholder="ZIP Code * (4 digits)" [(ngModel)]="agencyZip" name="agencyZip" required
-          [class.error]="errors['agencyZip']" />
+          [class.error]="errors['agencyZip']" style="margin-top: 0.75rem;" />
         <div class="error-text" *ngIf="errors['agencyZip']">{{ errors["agencyZip"] }}</div>
       </div>
       <div class="form-section">

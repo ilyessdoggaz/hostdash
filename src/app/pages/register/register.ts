@@ -1,9 +1,12 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectorRef } from "@angular/core";
 import { Router } from "@angular/router";
 import { FormsModule } from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import { RouterLink } from "@angular/router";
 import { Auth } from "../../services/auth";
+
+declare const google: any;
+
 
 @Component({
   selector: "app-register",
@@ -18,6 +21,16 @@ export class Register implements OnInit {
   agencyCity = "";
   agencyAddress = "";
   agencyZip = "";
+  agencyLatitude = 0;
+  agencyLongitude = 0;
+  logoPreview: string | null = null;
+  logoFile: File | null = null;
+
+  // Map state
+  showMap = false;
+  map: any;
+  marker: any;
+  private readonly TUNISIA_CENTER = { lat: 33.8869, lng: 9.5375 };
 
   // Manager Info
   managerFirstName = "";
@@ -53,8 +66,8 @@ export class Register implements OnInit {
   // Tunisia ZIP codes (4 digits, starting with valid prefixes)
   readonly zipPattern = /^\d{4}$/;
 
-  // Tunisia phone pattern (8 digits, starting with 2, 4, 5, 9)
-  readonly phonePattern = /^[2459]\d{7}$/;
+  // Tunisia phone pattern (8 digits)
+  readonly phonePattern = /^\d{8}$/;
 
   // Tunisia RC pattern (Registre du Commerce)
   readonly rcPattern = /^[A-Za-z]?\d{6,8}$/;
@@ -64,7 +77,7 @@ export class Register implements OnInit {
 
   currentUser: any; // Added for ngOnInit
 
-  constructor(private auth: Auth, private router: Router) {
+  constructor(private auth: Auth, private router: Router, private cdr: ChangeDetectorRef) {
     if (this.auth.isLoggedIn()) {
       this.router.navigate(['/dashboard']);
     }
@@ -106,9 +119,15 @@ export class Register implements OnInit {
       isValid = false;
     }
 
-    // Address validation
+    // Address validation - must be auto-filled from map selection
     if (!this.agencyAddress || this.agencyAddress.length < 10) {
-      this.errors["agencyAddress"] = "Please enter a complete address (min 10 characters)";
+      this.errors["agencyAddress"] = "Please select your agency location on the map to auto-fill the address";
+      isValid = false;
+    }
+
+    // Location validation - coordinates are required
+    if (!this.agencyLatitude || !this.agencyLongitude) {
+      this.errors["agencyAddress"] = "Please select your agency location on the map";
       isValid = false;
     }
 
@@ -138,7 +157,7 @@ export class Register implements OnInit {
       this.errors["managerPhone"] = "Phone number is required";
       isValid = false;
     } else if (!this.phonePattern.test(this.managerPhone)) {
-      this.errors["managerPhone"] = "Invalid Tunisia phone number. Must be 8 digits starting with 2, 4, 5, or 9 (e.g., 20123456)";
+      this.errors["managerPhone"] = "Phone must be 8 digits (e.g., 04469164)";
       isValid = false;
     }
 
@@ -211,6 +230,123 @@ export class Register implements OnInit {
     return emailPattern.test(email);
   }
 
+  openMapPicker() {
+    this.showMap = true;
+    this.cdr.detectChanges();
+    setTimeout(() => this.loadGoogleMaps(), 100);
+  }
+
+  closeMapPicker() {
+    this.showMap = false;
+    this.map = null;
+    this.marker = null;
+    this.cdr.detectChanges();
+  }
+
+  private initMap() {
+    const mapElement = document.getElementById('register-map');
+    if (!mapElement) return;
+
+    this.map = new google.maps.Map(mapElement, {
+      center: this.TUNISIA_CENTER,
+      zoom: 7,
+      mapTypeId: 'roadmap',
+      styles: [{ featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] }]
+    });
+
+    this.map.addListener('click', (event: any) => {
+      const lat = event.latLng.lat();
+      const lng = event.latLng.lng();
+      this.updateMarker(lat, lng);
+    });
+  }
+
+  private loadGoogleMaps() {
+    if (typeof google !== "undefined" && google.maps) {
+      this.initMap();
+      return;
+    }
+    const apiKey = "AIzaSyAYulgRVgsSypvjULhmPRCvtNozLJXfPfM";
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMapRegister`;
+    script.async = true;
+    script.defer = true;
+    (window as any).initMapRegister = () => this.initMap();
+    document.head.appendChild(script);
+  }
+
+  private updateMarker(lat: number, lng: number) {
+    if (this.marker) {
+      this.marker.setPosition({ lat, lng });
+    } else {
+      this.marker = new google.maps.Marker({
+        position: { lat, lng },
+        map: this.map,
+        animation: google.maps.Animation.DROP,
+        draggable: true
+      });
+
+      this.marker.addListener('dragend', (e: any) => {
+        const newLat = e.latLng.lat();
+        const newLng = e.latLng.lng();
+        this.updateMarkerCoords(newLat, newLng);
+      });
+    }
+    this.updateMarkerCoords(lat, lng);
+  }
+
+  private updateMarkerCoords(lat: number, lng: number) {
+    this.agencyLatitude = lat;
+    this.agencyLongitude = lng;
+    this.reverseGeocode(lat, lng);
+    this.cdr.detectChanges();
+  }
+
+  private reverseGeocode(lat: number, lng: number) {
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ location: { lat, lng } }, (results: any, status: any) => {
+      if (status === 'OK' && results[0]) {
+        this.agencyAddress = results[0].formatted_address;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  onLogoSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        this.errors['logo'] = 'Please select a valid image file (JPEG, JPG, or PNG)';
+        this.cdr.detectChanges();
+        return;
+      }
+
+      // Clear any previous errors
+      delete this.errors['logo'];
+
+      // Store file reference
+      this.logoFile = file;
+
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.logoPreview = e.target.result;
+        this.cdr.detectChanges();
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeLogo(event: Event) {
+    event.stopPropagation(); // Prevent triggering file input click
+    this.logoPreview = null;
+    this.logoFile = null;
+    delete this.errors['logo'];
+    this.cdr.detectChanges();
+  }
+
   register() {
     // Clear previous errors and any existing auth session
     this.error = "";
@@ -229,6 +365,8 @@ export class Register implements OnInit {
       city: this.agencyCity,
       address: this.agencyAddress,
       zipCode: this.agencyZip,
+      latitude: this.agencyLatitude,
+      longitude: this.agencyLongitude,
       matriculeFiscale: this.legalTaxId,
       rneNumber: this.rneNumber,
       patenteNumber: this.patenteNumber,
@@ -238,7 +376,8 @@ export class Register implements OnInit {
       phone: this.managerPhone,
       email: this.email,
       password: this.password,
-      confirmPassword: this.confirmPassword
+      confirmPassword: this.confirmPassword,
+      logo: ""
     };
 
     console.log("Submitting registration to backend:", payload);
