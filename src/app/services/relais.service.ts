@@ -22,14 +22,19 @@ export class RelaisService {
         } catch { return null; }
     }
 
-    /** Normalize point to ensure `id` exists */
+    /** Normalize point to ensure `id` exists and is a string */
     private normalizePoint(p: any): PointDeRelais {
         if (!p) return p as PointDeRelais;
+        // Handle cases where the point might be nested in a 'data', 'relay', or 'relayPoint' property
         const raw = p.data || p.relay || p.relayPoint || p;
-        const id = raw._id?.toString() || raw.id?.toString() || '';
+        
+        // Extract ID from various possible names (_id, id, relayId)
+        const id = (raw._id || raw.id || raw.relayId || '').toString();
+        
         return {
             ...raw,
-            id
+            id: id || '',
+            active: raw.active !== undefined ? raw.active : (raw.status === 'ACTIVE')
         } as PointDeRelais;
     }
 
@@ -72,14 +77,17 @@ export class RelaisService {
     }
 
     /**
-     * Deactivate a point de relais
+     * Deactivate a point de relais (Logical delete)
      */
     deactivatePoint(id: string): Observable<PointDeRelais> {
-        const url = `${this.apiUrl}/${id}/deactivate`;
-        // Sending an empty object {} instead of null is safer for some backend parsers
-        return this.http.patch<any>(url, {}, { headers: { 'Content-Type': 'application/json' } }).pipe(
+        // Essential: Use encodeURIComponent for IDs in path variables
+        const url = `${this.apiUrl}/${encodeURIComponent(id)}/deactivate`;
+        
+        // Backend returns the updated point object (with active: false)
+        return this.http.patch<any>(url, {}).pipe(
             map(res => this.normalizePoint(res)),
-            map(point => ({ ...point, id, active: false })), // Ensure ID and Status are preserved
+            // Double-check active state locally just in case
+            map(point => ({ ...point, id, active: false })),
             catchError(err => this.handleError(err))
         );
     }

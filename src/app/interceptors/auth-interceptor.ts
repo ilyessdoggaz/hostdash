@@ -51,16 +51,35 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       }
     }
 
+    // Add headers that the backend (Vehicle Service) expects from the Gateway
     const headers: Record<string, string> = {
       Authorization: `Bearer ${token}`
     };
 
-    // if (agencyId) {
-    //   headers['X-Agency-Id'] = agencyId;
-    //   console.log('[AuthInterceptor] Sending X-Agency-Id:', agencyId);
-    // } else {
-    //   console.warn('[AuthInterceptor] No agencyId found — sending only Bearer token');
-    // }
+    // Authorities / Roles extraction for the backend's GatewayHeaderAuthFilter
+    let role: string | null = null;
+    let email: string | null = null;
+
+    try {
+      const payloadBase64 = token.split('.')[1];
+      if (payloadBase64) {
+        const payload = JSON.parse(atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/')));
+        role = payload.role || payload.roles?.[0] || (payload.realm_access?.roles?.includes('AGENCE') ? 'AGENCE' : null);
+        email = payload.email || payload.sub || payload.preferred_username;
+        
+        // Re-extract agencyId just to be sure we have the latest from payload
+        agencyId = payload.agencyId || payload.agenceId || payload.agency_id || agencyId;
+      }
+    } catch (e) {
+      console.warn('[AuthInterceptor] Error extracting claims for headers:', e);
+    }
+
+    if (role) headers['X-User-Role'] = role;
+    if (email) headers['X-User-Email'] = email;
+    if (agencyId) {
+      headers['X-Agency-Id'] = agencyId;
+      console.log('[AuthInterceptor] 🚀 Injecting Identity Headers:', { role, email, agencyId });
+    }
 
     req = req.clone({ setHeaders: headers });
   }

@@ -203,13 +203,10 @@ export class PointDeRelaisPage implements OnInit, AfterViewInit {
     deactivatePoint(id: string) {
         if (!id) {
             console.error('[PointDeRelaisPage] Cannot deactivate point: ID is missing');
-            this.notificationService.showToast('Error: Missing point ID', 'error');
             return;
         }
 
-        console.log('[PointDeRelaisPage] Deactivate request for ID:', id);
-        
-        if (!confirm('Are you sure you want to deactivate this relay point?')) {
+        if (!confirm('Are you sure you want to deactivate this relay point? This point will no longer be available for selection.')) {
             return;
         }
 
@@ -217,20 +214,24 @@ export class PointDeRelaisPage implements OnInit, AfterViewInit {
         this.relaisService.deactivatePoint(id).subscribe({
             next: (updatedPoint) => {
                 this.isSubmitting = false;
-                console.log('[PointDeRelaisPage] Deactivation success:', updatedPoint);
                 this.notificationService.showToast('Point deactivated successfully', 'success');
                 
                 // Find index using normalized ID
                 const index = this.points.findIndex(p => p.id === id);
                 
                 if (index !== -1) {
-                    // Create a new array reference to ensure change detection
-                    const newPoints = [...this.points];
-                    newPoints[index] = updatedPoint;
-                    this.points = newPoints;
-                    console.log('[PointDeRelaisPage] Updated local state for point:', id);
+                    // Update in place to maintain sorting and position
+                    const currentPoints = [...this.points];
+                    currentPoints[index] = { 
+                        ...currentPoints[index], 
+                        ...updatedPoint,
+                        id: id, // Ensure ID is preserved
+                        active: false 
+                    };
+                    this.points = currentPoints;
+                    console.log('[PointDeRelaisPage] Local state updated for point:', id);
                 } else {
-                    console.warn('[PointDeRelaisPage] Could not find point in local list, reloading all points');
+                    console.warn('[PointDeRelaisPage] Could not find point in list, reloading all points');
                     this.loadPoints();
                 }
                 this.cdr.detectChanges();
@@ -238,7 +239,7 @@ export class PointDeRelaisPage implements OnInit, AfterViewInit {
             error: (err) => {
                 this.isSubmitting = false;
                 console.error('[PointDeRelaisPage] Server error during deactivation:', err);
-                this.notificationService.showToast(err || 'Failed to deactivate point. Please try again.', 'error');
+                this.notificationService.showToast(err || 'Failed to deactivate point.', 'error');
                 this.cdr.detectChanges();
             }
         });
