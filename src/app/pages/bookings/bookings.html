@@ -1,0 +1,89 @@
+<div class="bookings-container">
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" (click)="goBack()">
+                <span class="material-icons">arrow_back</span>
+            </button>
+            <div>
+                <h1>Bookings</h1>
+                <p class="subtitle">Manage and track your vehicle rentals</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="stats-row" *ngIf="!loading && bookings.length > 0">
+        <div class="mini-stat">
+            <span class="label">Total Bookings</span>
+            <span class="value">{{bookings.length}}</span>
+        </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading your bookings...</p>
+    </div>
+
+    <div class="error-container" *ngIf="error">
+        <span class="material-icons">error</span>
+        <p>{{error}}</p>
+        <button class="retry-btn" (click)="loadBookings()">Retry</button>
+    </div>
+
+    <div class="bookings-content" *ngIf="!loading && !error">
+        <div class="cars-grid" *ngIf="bookings.length > 0">
+            <div class="car-card" *ngFor="let booking of bookings" (click)="viewVehicle(booking.vehicle.id)">
+                <div class="car-image">
+                    <img *ngIf="booking.vehicle.images && booking.vehicle.images.length > 0" 
+                         [src]="booking.vehicle.images[0]" [alt]="booking.vehicle.model">
+                    <div *ngIf="!booking.vehicle.images || booking.vehicle.images.length === 0" class="image-placeholder">
+                        <span class="material-icons">directions_car</span>
+                    </div>
+                    <span [class]="'status-badge ' + getStatusClass(booking.status)">
+                        {{(booking.status || 'PENDING').replace('_', ' ')}}
+                    </span>
+                </div>
+                
+                <div class="car-info">
+                    <div class="car-header">
+                        <h3>{{booking.vehicle.brand}} {{booking.vehicle.model}}</h3>
+                        <span class="plate">{{booking.vehicle.matricule}}</span>
+                    </div>
+                    
+                    <div class="booking-dates">
+                        <div class="date-row">
+                            <span class="material-icons">login</span>
+                            <span class="date-val">{{booking.startDate | date:'mediumDate'}}</span>
+                        </div>
+                        <div class="date-row">
+                            <span class="material-icons">logout</span>
+                            <span class="date-val">{{booking.endDate | date:'mediumDate'}}</span>
+                        </div>
+                    </div>
+
+                    <div class="car-footer">
+                        <div class="price" *ngIf="booking.totalPrice">
+                            <span class="amount">{{booking.totalPrice | number:'1.2-2'}} DT</span>
+                            <span class="period">Total</span>
+                        </div>
+                        <div class="actions">
+                            <button class="action-btn details">
+                                <span class="material-icons">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state" *ngIf="bookings.length === 0">
+            <div class="empty-icon">
+                <span class="material-icons">event_busy</span>
+            </div>
+            <h2>No active bookings</h2>
+            <p>Once a customer rents one of your vehicles, it will appear here.</p>
+            <button class="action-btn" (click)="router.navigate(['/my-cars'])">
+                View My Fleet
+            </button>
+        </div>
+    </div>
+</div>

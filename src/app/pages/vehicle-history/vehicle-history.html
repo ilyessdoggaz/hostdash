@@ -1,0 +1,67 @@
+<div class="history-container">
+  <header class="history-header">
+    <button (click)="goBack()" class="back-btn">
+      <span class="material-icons">arrow_back</span>
+    </button>
+    <div class="header-info" *ngIf="vehicle">
+      <h1>Tracking History</h1>
+      <p>{{ vehicle.brand }} {{ vehicle.model }} • {{ vehicle.matricule }}</p>
+    </div>
+  </header>
+
+  <main class="history-content">
+    <div *ngIf="loading" class="state-container">
+      <div class="spinner"></div>
+      <p>Loading tracking data...</p>
+    </div>
+
+    <div *ngIf="error" class="state-container error">
+      <span class="material-icons">error_outline</span>
+      <p>{{ error }}</p>
+      <button (click)="loadVehicleAndHistory(vehicle?.id || '')" class="retry-btn">Retry</button>
+    </div>
+
+    <ng-container *ngIf="!loading && !error">
+      <div class="map-section">
+        <div id="history-map"></div>
+        <div *ngIf="history.length === 0" class="no-history-overlay">
+          <p>No tracking history available for this vehicle.</p>
+        </div>
+      </div>
+
+      <div class="data-section">
+        <div class="stats-cards" *ngIf="history.length > 0">
+          <div class="stat-card">
+            <span class="label">Total Pings</span>
+            <span class="value">{{ history.length }}</span>
+          </div>
+          <div class="stat-card">
+            <span class="label">Last Speed</span>
+            <span class="value">{{ lastPing?.speed || 0 }} km/h</span>
+          </div>
+        </div>
+
+        <div class="history-list-container">
+          <h3>Position Log</h3>
+          <div class="history-list">
+            <div *ngFor="let ping of history" class="ping-item">
+              <div class="ping-icon">
+                <span class="material-icons">location_on</span>
+              </div>
+              <div class="ping-details">
+                <span class="timestamp">{{ ping.timestamp | date:'medium' }}</span>
+                <span class="coords">{{ ping.latitude | number:'1.6-6' }}, {{ ping.longitude | number:'1.6-6' }}</span>
+              </div>
+              <div class="ping-speed">
+                {{ ping.speed || 0 }} km/h
+              </div>
+            </div>
+            <div *ngIf="history.length === 0" class="empty-list">
+              No positions recorded.
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </main>
+</div>

@@ -1,0 +1,70 @@
+<div class="dashboard-layout">
+  <nav class="sidebar">
+    <ul class="nav-list">
+      <li class="nav-item" routerLink="/my-cars" routerLinkActive="active">
+        <span class="material-icons">directions_car</span>
+        <span>My Cars</span>
+      </li>
+      <li class="nav-item" routerLink="/archived-cars" routerLinkActive="active">
+        <span class="material-icons">inventory_2</span>
+        <span>Archives</span>
+      </li>
+      <li class="nav-item" routerLink="/point-de-relais" routerLinkActive="active">
+        <span class="material-icons">place</span>
+        <span>Points de Relais</span>
+      </li>
+      <li class="nav-item" routerLink="/bookings" routerLinkActive="active">
+        <span class="material-icons">event_available</span>
+        <span>Bookings</span>
+      </li>
+      <li class="nav-item">
+        <span class="material-icons">payments</span>
+        <span>Earnings</span>
+      </li>
+      <li class="nav-item logout" (click)="logout()">
+        <span class="material-icons">logout</span>
+        <span>Logout</span>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="content">
+    <div class="compact-header">
+      <div class="welcome-group">
+        <h1>Welcome back, {{currentUser?.firstName || hostProfile?.agencyName || 'Host'}}</h1>
+        <button class="add-car-btn-compact" (click)="router.navigate(['/add-car'])">
+          <span class="material-icons">add</span>
+          Add New Car
+        </button>
+      </div>
+
+      <div class="compact-stats">
+        <div class="mini-stat-card">
+          <span class="stat-label">Total Earn</span>
+          <span class="stat-value">{{totalEarn}} DT</span>
+        </div>
+        <div class="mini-stat-card">
+          <span class="stat-label">Rented</span>
+          <span class="stat-value">{{rentedCount}}</span>
+        </div>
+        <div class="mini-stat-card">
+          <span class="stat-label">Available</span>
+          <span class="stat-value">{{availableCount}}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-map-section">
+      <div class="map-header">
+        <div class="header-info">
+          <h3> Live Car Tracker - Tunisia</h3>
+          <div class="map-legend">
+            <span class="legend-item"><span class="dot available"></span> Available</span>
+            <span class="legend-item"><span class="dot rented"></span> Rented</span>
+          </div>
+        </div>
+      </div>
+      <div id="google-map" class="google-map-container"></div>
+    </div>
+  </main>
+</div>

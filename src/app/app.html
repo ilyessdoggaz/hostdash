@@ -1,0 +1,20 @@
+<header class="global-header" *ngIf="!isAuthRoute()">
+  <a routerLink="/" class="logo-container">
+    <div class="logo-icon">
+      <span class="material-icons" style="font-size: 20px;">directions_car</span>
+    </div>
+    <span class="brand-name">Dashboard</span>
+  </a>
+
+
+  <button class="profile-entry" (click)="router.navigate(['/profile'])">
+    <img *ngIf="hostProfile?.agencyLogo" [src]="hostProfile.agencyLogo" alt="Profile" class="header-logo">
+    <span *ngIf="!hostProfile?.agencyLogo" class="material-icons">account_circle</span>
+  </button>
+</header>
+
+<main class="app-content">
+  <router-outlet></router-outlet>
+</main>
+
+<app-global-notification></app-global-notification>
